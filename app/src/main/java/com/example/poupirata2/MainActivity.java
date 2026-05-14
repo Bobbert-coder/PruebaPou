@@ -1,8 +1,13 @@
 package com.example.poupirata2;
 
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -26,6 +31,8 @@ public class MainActivity extends AppCompatActivity {
     Mascota mascota;
     SharedPreferences prefs;
     SharedPreferences.Editor editor;
+    View fillHambre, fillEnergia;
+    FrameLayout boxHambre, boxEnergia;
 
 
 
@@ -51,13 +58,18 @@ public class MainActivity extends AppCompatActivity {
         mascota.setFelicidad(felicidad);
 
         // Referencias UI
-        progressHambre = findViewById(R.id.progressHambre);
-        progressEnergia = findViewById(R.id.progressEnergia);
+        fillHambre = findViewById(R.id.fillHambre);
+        fillEnergia = findViewById(R.id.fillEnergia);
+        boxHambre = findViewById(R.id.boxHambre);
+        boxEnergia = findViewById(R.id.boxEnergia);
+        //progressEnergia = findViewById(R.id.progressEnergia);
         progressFelicidad = findViewById(R.id.progressFelicidad);
 
         btnAlimentar = findViewById(R.id.btnAlimentar);
         btnDormir = findViewById(R.id.btnDormir);
         btnJugar = findViewById(R.id.btnJugar);
+
+
 
         mainLayout = findViewById(R.id.layoutMain);
         btnFlecha1 = findViewById(R.id.btnFlecha1);
@@ -159,14 +171,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void actualizarUI() {
-        progressHambre.setProgress(mascota.getHambre());
-        progressEnergia.setProgress(mascota.getEnergia());
+        actualizarStat(fillHambre, mascota.getHambre());
+        actualizarStat(fillEnergia, mascota.getEnergia());
         progressFelicidad.setProgress(mascota.getFelicidad());
     }
 
     private void aplicarTiempoFuera() {
-
-
         long ultimoTiempo = prefs.getLong("ultimoTiempo", -1);
         if (ultimoTiempo != -1) {
             long tiempoActual = System.currentTimeMillis();
@@ -176,7 +186,25 @@ public class MainActivity extends AppCompatActivity {
             int segundos = (int) (diferencia / 1000);
 
             mascota.aplicarDesgastePorTiempo(segundos);
-
         }
     }
+
+    private void actualizarStat(View fillView, int valor) {
+
+        int alturaMax = 70; // mismo tamaño del cuadro
+        int nuevaAltura = (alturaMax * valor) / 100;
+        ViewGroup.LayoutParams params = fillView.getLayoutParams();
+        params.height = nuevaAltura;
+        fillView.setLayoutParams(params);
+        // Cambiar color según valor
+
+        if (valor > 60) {
+            fillView.setBackgroundColor(Color.parseColor("#4CAF50"));
+        } else if (valor > 30) {
+            fillView.setBackgroundColor(Color.parseColor("#FFC107"));
+        } else {
+            fillView.setBackgroundColor(Color.parseColor("#F44336"));
+        }
+    }
+
 }
