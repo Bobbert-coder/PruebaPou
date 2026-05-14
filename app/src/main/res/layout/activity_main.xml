@@ -225,6 +225,8 @@
                 android:background="@drawable/stat_border"
                 android:clipToOutline="true">
 
+
+
                 <View
                     android:id="@+id/fillHambre"
                     android:layout_width="match_parent"
@@ -246,6 +248,12 @@
                 android:text="Energía"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/> -->
+
+            <TextView
+                android:id="@+id/testHambre"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="Prueba"/>
 
             <FrameLayout
                 android:layout_marginHorizontal="8dp"
