@@ -14,6 +14,7 @@ import android.widget.ProgressBar;
 
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Handler;
+import android.widget.TextView;
 import android.widget.ViewFlipper;
 
 public class MainActivity extends AppCompatActivity {
@@ -27,6 +28,7 @@ public class MainActivity extends AppCompatActivity {
     ProgressBar progressHambre, progressEnergia, progressFelicidad;
     Button btnAlimentar, btnDormir, btnJugar;
     private long finTiempoGracia = 0;
+    TextView txtHambre;
 
     Mascota mascota;
     SharedPreferences prefs;
@@ -56,6 +58,8 @@ public class MainActivity extends AppCompatActivity {
         mascota.setHambre(hambre);
         mascota.setEnergia(energia);
         mascota.setFelicidad(felicidad);
+
+        txtHambre = findViewById(R.id.testHambre);
 
         // Referencias UI
         fillHambre = findViewById(R.id.fillHambre);
@@ -176,6 +180,7 @@ public class MainActivity extends AppCompatActivity {
         actualizarStat(fillHambre, mascota.getHambre());
         actualizarStat(fillEnergia, mascota.getEnergia());
         actualizarStat(fillFelicidad, mascota.getFelicidad());
+        txtHambre.setText("Hambre: " + mascota.getHambre() + "/ 1000");
     }
 
     private void aplicarTiempoFuera() {
@@ -193,7 +198,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void actualizarStat(View fillView, int valor) {
         int alturaMax = 250; // mismo tamaño del cuadro
-        int nuevaAltura = (alturaMax * valor) / 100;
+        int nuevaAltura = (alturaMax * valor) / 1000;
         ViewGroup.LayoutParams params = fillView.getLayoutParams();
         params.height = nuevaAltura;
         fillView.setLayoutParams(params);

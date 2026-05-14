@@ -2,6 +2,9 @@ package com.example.poupirata2;
 public class Mascota {
 
     private int hambre = 50;
+    public int maxhambre = 1000;
+    public int maxenergia = 1000;
+    public int maxfelicidad = 1000;
     private int energia = 50;
     private int felicidad = 50;
 
@@ -10,11 +13,11 @@ public class Mascota {
     public int getFelicidad() { return felicidad; }
 
     public void alimentar() {
-        hambre = Math.min(hambre + 10, 100);
+        hambre = Math.min(hambre + 10, maxhambre);
     }
 
     public void dormir() {
-        energia = Math.min(energia + 10, 100);
+        energia = Math.min(energia + 10, maxenergia);
         hambre = Math.max(hambre - 5, 0);
         felicidad = Math.max(felicidad - 2, 0);
     }
@@ -35,7 +38,7 @@ public class Mascota {
     }
 
     public void jugar() {
-        felicidad = Math.min(felicidad + 10, 100);
+        felicidad = Math.min(felicidad + 10, maxfelicidad);
         energia = Math.max(energia - 5, 0);
         hambre = Math.max(hambre - 3, 0);
     }
