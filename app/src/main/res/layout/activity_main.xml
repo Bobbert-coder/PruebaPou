@@ -197,9 +197,7 @@
             android:layout_height="wrap_content"
             android:gravity="center_horizontal"
             android:background="#66000000"
-            android:padding="12dp"
-            android:layout_marginLeft="45dp"
-            android:layout_marginRight="45dp">
+            android:padding="12dp">
 
             <!-- Hambre -->
             <!--
