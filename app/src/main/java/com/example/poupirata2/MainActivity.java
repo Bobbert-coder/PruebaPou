@@ -192,8 +192,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void actualizarStat(View fillView, int valor) {
-
-        int alturaMax = 300; // mismo tamaño del cuadro
+        int alturaMax = 250; // mismo tamaño del cuadro
         int nuevaAltura = (alturaMax * valor) / 100;
         ViewGroup.LayoutParams params = fillView.getLayoutParams();
         params.height = nuevaAltura;

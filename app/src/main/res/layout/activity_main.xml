@@ -35,6 +35,10 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Alimentar"
+                    android:background="@drawable/button_style"
+                    android:textColor="#FFFFFF"
+                    android:textStyle="bold"
+                    android:backgroundTint="@null"
                     android:layout_marginStart="10dp"/>
 
                 <Button
@@ -42,6 +46,10 @@
                     android:layout_width="120dp"
                     android:layout_height="wrap_content"
                     android:text="Nevera"
+                    android:background="@drawable/button_style"
+                    android:textColor="#FFFFFF"
+                    android:textStyle="bold"
+                    android:backgroundTint="@null"
                     android:layout_marginStart="10dp"/>
             </LinearLayout>
         </FrameLayout>
@@ -71,6 +79,10 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Dormir"
+                    android:background="@drawable/button_style"
+                    android:textColor="#FFFFFF"
+                    android:textStyle="bold"
+                    android:backgroundTint="@null"
                     android:layout_marginStart="10dp"/>
 
                 <Button
@@ -78,6 +90,10 @@
                     android:layout_width="120dp"
                     android:layout_height="wrap_content"
                     android:text="Coche"
+                    android:background="@drawable/button_style"
+                    android:textColor="#FFFFFF"
+                    android:textStyle="bold"
+                    android:backgroundTint="@null"
                     android:layout_marginStart="10dp"/>
 
             </LinearLayout>
@@ -109,6 +125,10 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Jugar"
+                    android:background="@drawable/button_style"
+                    android:textColor="#FFFFFF"
+                    android:textStyle="bold"
+                    android:backgroundTint="@null"
                     android:layout_marginStart="10dp"/>
 
                 <Button
@@ -116,6 +136,10 @@
                     android:layout_width="120dp"
                     android:layout_height="wrap_content"
                     android:text="Coche"
+                    android:background="@drawable/button_style"
+                    android:textColor="#FFFFFF"
+                    android:textStyle="bold"
+                    android:backgroundTint="@null"
                     android:layout_marginStart="10dp"/>
 
             </LinearLayout>
