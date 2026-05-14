@@ -31,8 +31,8 @@ public class MainActivity extends AppCompatActivity {
     Mascota mascota;
     SharedPreferences prefs;
     SharedPreferences.Editor editor;
-    View fillHambre, fillEnergia;
-    FrameLayout boxHambre, boxEnergia;
+    View fillHambre, fillEnergia, fillFelicidad;
+    FrameLayout boxHambre, boxEnergia, boxFelicidad;
 
 
 
@@ -60,10 +60,12 @@ public class MainActivity extends AppCompatActivity {
         // Referencias UI
         fillHambre = findViewById(R.id.fillHambre);
         fillEnergia = findViewById(R.id.fillEnergia);
+        fillFelicidad = findViewById(R.id.fillFelicidad);
+        boxFelicidad = findViewById(R.id.boxFelicidad);
         boxHambre = findViewById(R.id.boxHambre);
         boxEnergia = findViewById(R.id.boxEnergia);
         //progressEnergia = findViewById(R.id.progressEnergia);
-        progressFelicidad = findViewById(R.id.progressFelicidad);
+        //progressFelicidad = findViewById(R.id.progressFelicidad);
 
         btnAlimentar = findViewById(R.id.btnAlimentar);
         btnDormir = findViewById(R.id.btnDormir);
@@ -173,7 +175,7 @@ public class MainActivity extends AppCompatActivity {
     private void actualizarUI() {
         actualizarStat(fillHambre, mascota.getHambre());
         actualizarStat(fillEnergia, mascota.getEnergia());
-        progressFelicidad.setProgress(mascota.getFelicidad());
+        actualizarStat(fillFelicidad, mascota.getFelicidad());
     }
 
     private void aplicarTiempoFuera() {
@@ -191,7 +193,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void actualizarStat(View fillView, int valor) {
 
-        int alturaMax = 70; // mismo tamaño del cuadro
+        int alturaMax = 300; // mismo tamaño del cuadro
         int nuevaAltura = (alturaMax * valor) / 100;
         ViewGroup.LayoutParams params = fillView.getLayoutParams();
         params.height = nuevaAltura;
