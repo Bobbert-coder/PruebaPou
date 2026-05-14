@@ -21,8 +21,8 @@ public class Mascota {
 
     public void reducirConTiempo() {
         hambre = Math.max(hambre - 5, 0);
-        energia = Math.max(energia - 3, 0);
-        felicidad = Math.max(felicidad - 2, 0);
+        energia = Math.max(energia - 5, 0);
+        felicidad = Math.max(felicidad - 5, 0);
     }
 
     public void aplicarDesgastePorTiempo(int segundos) {
