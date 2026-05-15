@@ -11,6 +11,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.content.Intent;
 
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Handler;
@@ -111,6 +112,13 @@ public class MainActivity extends AppCompatActivity {
             viewFlipper.showNext();
         });
         actualizarUI();
+
+        Button btnMiniGame = findViewById(R.id.btnMinigame);
+
+        btnMiniGame.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, MiniGameActivity.class);
+            startActivity(intent);
+        });
 
         runnable = new Runnable() {
             @Override
