@@ -33,7 +33,6 @@ public class MainActivity extends AppCompatActivity {
     boolean isRun = true;
     Button btnAlimentar, btnDormir, btnJugar, btnNevera;
     private long finTiempoGracia = 0;
-    TextView txtHambre;
 
     Mascota mascota;
     SharedPreferences prefs;
@@ -61,8 +60,6 @@ public class MainActivity extends AppCompatActivity {
         mascota.setHambre(hambre);
         mascota.setEnergia(energia);
         mascota.setFelicidad(felicidad);
-
-        txtHambre = findViewById(R.id.testHambre);
 
         // Referencias UI
         imgComida = findViewById(R.id.imgComida);
@@ -274,7 +271,6 @@ public class MainActivity extends AppCompatActivity {
         actualizarStat(fillHambre, mascota.getHambre());
         actualizarStat(fillEnergia, mascota.getEnergia());
         actualizarStat(fillFelicidad, mascota.getFelicidad());
-        txtHambre.setText("Hambre: " + mascota.getHambre() + "/ 1000");
     }
 
     private void aplicarTiempoFuera() {
