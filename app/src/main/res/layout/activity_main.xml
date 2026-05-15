@@ -23,6 +23,14 @@
                 android:src="@drawable/fondo1"
                 android:scaleType="centerCrop"/>
 
+            <ImageView
+                android:id="@+id/imgComida"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:src="@drawable/ic_comida"
+                android:layout_gravity="bottom|center_horizontal"
+                android:layout_margin="150dp"/>
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -30,6 +38,7 @@
                 android:gravity="bottom|center_horizontal"
                 android:layout_marginBottom="40dp">
                 <!-- Elementos encima -->
+
                 <Button
                     android:id="@+id/btnAlimentar"
                     android:layout_width="wrap_content"
@@ -312,7 +321,7 @@
 
         <Space
             android:layout_width="match_parent"
-            android:layout_height="90dp"/>
+            android:layout_height="45dp"/>
 
         <!-- Mascota -->
         <ImageView
