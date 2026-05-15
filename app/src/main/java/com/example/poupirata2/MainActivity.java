@@ -1,24 +1,30 @@
 package com.example.poupirata2;
 
+import android.annotation.SuppressLint;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.graphics.Rect;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Handler;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.ViewFlipper;
 
 public class MainActivity extends AppCompatActivity {
 
+    ImageView imgComida, imgMascota;
     private LinearLayout mainLayout;
     ViewFlipper viewFlipper;
     ImageButton btnFlecha1, btnFlecha2;
@@ -39,6 +45,7 @@ public class MainActivity extends AppCompatActivity {
 
 
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -62,6 +69,8 @@ public class MainActivity extends AppCompatActivity {
         txtHambre = findViewById(R.id.testHambre);
 
         // Referencias UI
+        imgComida = findViewById(R.id.imgComida);
+        imgMascota = findViewById(R.id.imgMascota);
         fillHambre = findViewById(R.id.fillHambre);
         fillEnergia = findViewById(R.id.fillEnergia);
         fillFelicidad = findViewById(R.id.fillFelicidad);
@@ -76,6 +85,15 @@ public class MainActivity extends AppCompatActivity {
         btnJugar = findViewById(R.id.btnJugar);
 
 
+        final float[] comidaX = new float[1];
+        final float[] comidaY = new float[1];
+
+        //Posicion inicial de la comida
+        imgComida.post(() -> {
+            comidaX[0] = imgComida.getX();
+            comidaY[0] = imgComida.getY();
+        });
+
 
         mainLayout = findViewById(R.id.layoutMain);
         btnFlecha1 = findViewById(R.id.btnFlecha1);
@@ -85,7 +103,7 @@ public class MainActivity extends AppCompatActivity {
         // Eventos
         btnAlimentar.setOnClickListener(v -> {
             activartiempodegracia();
-            mascota.alimentar();
+            mascota.alimentar(100);
             actualizarUI();
         });
 
@@ -115,6 +133,46 @@ public class MainActivity extends AppCompatActivity {
             viewFlipper.showNext();
         });
         actualizarUI();
+
+
+
+        imgComida.setOnTouchListener(new View.OnTouchListener() {
+            float dX, dY;
+            @Override
+            public boolean onTouch(View view, MotionEvent event) {
+
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        dX = view.getX() - event.getRawX();
+                        dY = view.getY() - event.getRawY();
+                        break;
+                    case MotionEvent.ACTION_MOVE:
+                        view.animate()
+                                .x(event.getRawX() + dX)
+                                .y(event.getRawY() + dY)
+                                .setDuration(0)
+                                .start();
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        if (colisionaConMascota(view, imgMascota)) {
+                            mascota.alimentar(350);
+                            activartiempodegracia();
+                            actualizarUI();
+                            Toast.makeText(MainActivity.this,
+                                    "Ñam ñam",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                        view.animate()
+                                .x(comidaX[0])
+                                .y(comidaY[0])
+                                .setDuration(300)
+                                .start();
+                        break;
+                }
+                return true;
+            }
+        });
+
 
         runnable = new Runnable() {
             @Override
@@ -211,6 +269,14 @@ public class MainActivity extends AppCompatActivity {
         } else {
             fillView.setBackgroundColor(Color.parseColor("#F44336"));
         }
+    }
+
+    private boolean colisionaConMascota(View comida, View mascota) {
+        Rect rectComida = new Rect();
+        comida.getHitRect(rectComida);
+        Rect rectMascota = new Rect();
+        mascota.getHitRect(rectMascota);
+        return Rect.intersects(rectComida, rectMascota);
     }
 
 }

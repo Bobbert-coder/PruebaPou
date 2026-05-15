@@ -12,8 +12,8 @@ public class Mascota {
     public int getEnergia() { return energia; }
     public int getFelicidad() { return felicidad; }
 
-    public void alimentar() {
-        hambre = Math.min(hambre + 10, maxhambre);
+    public void alimentar(int cantidad) {
+        hambre = Math.min(hambre + cantidad, maxhambre);
     }
 
     public void dormir() {
