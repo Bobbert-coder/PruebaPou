@@ -23,16 +23,15 @@ import android.widget.Toast;
 import android.widget.ViewFlipper;
 
 public class MainActivity extends AppCompatActivity {
-
+    int comidaActual = 0;
     ImageView imgComida, imgMascota;
     private LinearLayout mainLayout;
     ViewFlipper viewFlipper;
-    ImageButton btnFlecha1, btnFlecha2;
+    ImageButton btnFlecha1, btnFlecha2, btnManzana, btnPizza, btnHamburguesa;
     Handler handler = new Handler();
     Runnable runnable;
     boolean isRun = true;
-    ProgressBar progressHambre, progressEnergia, progressFelicidad;
-    Button btnAlimentar, btnDormir, btnJugar;
+    Button btnAlimentar, btnDormir, btnJugar, btnNevera;
     private long finTiempoGracia = 0;
     TextView txtHambre;
 
@@ -40,10 +39,7 @@ public class MainActivity extends AppCompatActivity {
     SharedPreferences prefs;
     SharedPreferences.Editor editor;
     View fillHambre, fillEnergia, fillFelicidad;
-    FrameLayout boxHambre, boxEnergia, boxFelicidad;
-
-
-
+    FrameLayout boxHambre, boxEnergia, boxFelicidad, menuNevera;
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -71,15 +67,23 @@ public class MainActivity extends AppCompatActivity {
         // Referencias UI
         imgComida = findViewById(R.id.imgComida);
         imgMascota = findViewById(R.id.imgMascota);
+
         fillHambre = findViewById(R.id.fillHambre);
         fillEnergia = findViewById(R.id.fillEnergia);
         fillFelicidad = findViewById(R.id.fillFelicidad);
+
         boxFelicidad = findViewById(R.id.boxFelicidad);
         boxHambre = findViewById(R.id.boxHambre);
         boxEnergia = findViewById(R.id.boxEnergia);
         //progressEnergia = findViewById(R.id.progressEnergia);
         //progressFelicidad = findViewById(R.id.progressFelicidad);
 
+        menuNevera = findViewById(R.id.menuNevera);
+
+        btnNevera = findViewById(R.id.btnNevera);
+        btnManzana = findViewById(R.id.btnManzana);
+        btnPizza = findViewById(R.id.btnPizza);
+        btnHamburguesa = findViewById(R.id.btnHamburguesa);
         btnAlimentar = findViewById(R.id.btnAlimentar);
         btnDormir = findViewById(R.id.btnDormir);
         btnJugar = findViewById(R.id.btnJugar);
@@ -134,6 +138,27 @@ public class MainActivity extends AppCompatActivity {
         });
         actualizarUI();
 
+        btnNevera.setOnClickListener(v -> {
+            menuNevera.setVisibility(View.VISIBLE);
+        });
+
+        btnManzana.setOnClickListener(v -> {
+            imgComida.setImageResource(R.drawable.ic_manzana);
+            comidaActual = 1;
+            menuNevera.setVisibility(View.GONE);
+        });
+        btnPizza.setOnClickListener(v -> {
+            imgComida.setImageResource(R.drawable.ic_pizza);
+            comidaActual = 2;
+            menuNevera.setVisibility(View.GONE);
+        });
+        btnHamburguesa.setOnClickListener(v -> {
+            imgComida.setImageResource(R.drawable.ic_comida);
+            comidaActual = 0;
+            menuNevera.setVisibility(View.GONE);
+        });
+
+
 
 
         imgComida.setOnTouchListener(new View.OnTouchListener() {
@@ -155,7 +180,18 @@ public class MainActivity extends AppCompatActivity {
                         break;
                     case MotionEvent.ACTION_UP:
                         if (colisionaConMascota(view, imgMascota)) {
-                            mascota.alimentar(350);
+
+                            switch (comidaActual) {
+                                case 1:
+                                    mascota.alimentar(100);
+                                    break;
+                                case 2:
+                                    mascota.alimentar(500);
+                                    break;
+                                case 0:
+                                    mascota.alimentar(250);
+                                    break;
+                            }
                             activartiempodegracia();
                             actualizarUI();
                             Toast.makeText(MainActivity.this,
