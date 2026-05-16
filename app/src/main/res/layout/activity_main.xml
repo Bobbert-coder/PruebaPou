@@ -151,6 +151,17 @@
                     android:backgroundTint="@null"
                     android:layout_marginStart="10dp"/>
 
+                <Button
+                    android:id="@+id/btnMinigame"
+                    android:layout_width="120dp"
+                    android:layout_height="wrap_content"
+                    android:text="Minijuegos"
+                    android:background="@drawable/button_style"
+                    android:textColor="#FFFFFF"
+                    android:textStyle="bold"
+                    android:backgroundTint="@null"
+                    android:layout_marginStart="10dp"/>
+
             </LinearLayout>
 
         </FrameLayout>
