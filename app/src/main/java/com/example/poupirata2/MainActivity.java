@@ -1,6 +1,7 @@
 package com.example.poupirata2;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Rect;
@@ -31,7 +32,7 @@ public class MainActivity extends AppCompatActivity {
     Handler handler = new Handler();
     Runnable runnable;
     boolean isRun = true;
-    Button btnAlimentar, btnDormir, btnJugar, btnNevera;
+    Button btnAlimentar, btnDormir, btnJugar, btnNevera, btnMinigame;
     private long finTiempoGracia = 0;
 
     Mascota mascota;
@@ -84,6 +85,7 @@ public class MainActivity extends AppCompatActivity {
         btnAlimentar = findViewById(R.id.btnAlimentar);
         btnDormir = findViewById(R.id.btnDormir);
         btnJugar = findViewById(R.id.btnJugar);
+        btnMinigame = findViewById(R.id.btnMinigame);
 
 
         final float[] comidaX = new float[1];
@@ -139,6 +141,12 @@ public class MainActivity extends AppCompatActivity {
             menuNevera.setVisibility(View.VISIBLE);
         });
 
+        btnMinigame.setOnClickListener(v ->{
+            Intent intent = new Intent(MainActivity.this, MiniGameActivity.class);
+            startActivity(intent);
+        });
+
+
         btnManzana.setOnClickListener(v -> {
             imgComida.setImageResource(R.drawable.ic_manzana);
             comidaActual = 1;
@@ -154,6 +162,7 @@ public class MainActivity extends AppCompatActivity {
             comidaActual = 0;
             menuNevera.setVisibility(View.GONE);
         });
+
 
 
 
