@@ -82,7 +82,7 @@ public class MainActivity extends AppCompatActivity {
         // Eventos
         btnAlimentar.setOnClickListener(v -> {
             activartiempodegracia();
-            mascota.alimentar();
+            mascota.alimentar(100);
             actualizarUI();
         });
 
