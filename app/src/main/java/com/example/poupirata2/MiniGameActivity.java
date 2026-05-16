@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.view.MotionEvent;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -34,33 +35,45 @@ public class MiniGameActivity extends AppCompatActivity {
             imgFood.setY(foodY);
 
             // Reiniciar comida
-            if (foodY > 2300) {
+            if (foodY > getWindow().getDecorView().getHeight()) {
                 foodY = 0;
-                foodX = random.nextInt(800);
+                reiniciarposicion();
                 aumento = Math.max(aumento - 40, 20);
                 imgFood.setX(foodX);
             }
 
+            // Colisión
             // Colisión
             if (imgFood.getX() < imgPlayer.getX() + imgPlayer.getWidth() &&
                     imgFood.getX() + imgFood.getWidth() > imgPlayer.getX() &&
                     imgFood.getY() < imgPlayer.getY() + imgPlayer.getHeight() &&
                     imgFood.getY() + imgFood.getHeight() > imgPlayer.getY()) {
 
-                if(aumento<150) aumento = aumento + 20;
+                if (aumento < 150)
+                    aumento += 20;
 
                 score++;
                 txtScore.setText("Puntos: " + score);
 
-                foodY = 0;
-                foodX = random.nextInt(800);
+                // Reiniciar comida COMPLETAMENTE
+                foodY = -200;
+
+                reiniciarposicion();
 
                 imgFood.setX(foodX);
+                imgFood.setY(foodY);
             }
 
             handler.postDelayed(this, 30);
         }
     };
+
+    void reiniciarposicion(){
+        int maxX = ((RelativeLayout)findViewById(R.id.activity_minigame)).getWidth()
+                - imgFood.getWidth();
+
+        foodX = random.nextInt(Math.max(maxX, 1));
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
