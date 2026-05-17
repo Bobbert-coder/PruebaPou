@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
@@ -160,6 +161,28 @@ public class MainActivity extends AppCompatActivity {
             });
 
             dialognevera.show();
+            Window windownevera = dialognevera.getWindow();
+
+            if (windownevera != null) {
+
+                int width = (int)(getResources()
+                        .getDisplayMetrics().widthPixels * 0.9);
+
+                int height = (int)(getResources()
+                        .getDisplayMetrics().heightPixels * 0.8);
+
+                windownevera.setLayout(width, height);
+
+                windownevera.setBackgroundDrawableResource(
+                        android.R.color.transparent
+                );
+            }
+
+            dialognevera.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+          /*  dialognevera.getWindow().setLayout(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+            );*/
         });
 
         btnMinigame.setOnClickListener(v ->{

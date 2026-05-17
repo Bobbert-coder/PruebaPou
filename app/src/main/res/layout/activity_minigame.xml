@@ -22,7 +22,7 @@
         android:id="@+id/imgFood"
         android:layout_width="80dp"
         android:layout_height="80dp"
-        android:src="@mipmap/ic_launcher"
+        android:src="@drawable/ic_comida"
         android:layout_marginTop="50dp"/>
 
     <!-- Mascota -->
@@ -30,7 +30,8 @@
         android:id="@+id/imgPlayer"
         android:layout_width="120dp"
         android:layout_height="120dp"
-        android:src="@mipmap/ic_launcher"
+        android:src="@drawable/ic_mascota"
+        android:scaleType="centerCrop"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="40dp"/>
