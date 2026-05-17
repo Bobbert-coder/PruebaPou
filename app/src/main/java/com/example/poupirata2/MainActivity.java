@@ -26,7 +26,7 @@ import android.widget.Toast;
 import android.widget.ViewFlipper;
 
 public class MainActivity extends AppCompatActivity {
-    int comidaActual = 0;
+    int comidaActual = 0, habitacionActual=0;
     ImageView imgComida, imgMascota;
     private LinearLayout mainLayout;
     ViewFlipper viewFlipper;
@@ -42,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
     SharedPreferences.Editor editor;
     View fillHambre, fillEnergia, fillFelicidad;
     FrameLayout boxHambre, boxEnergia, boxFelicidad;
+    TextView txtMonedas, txtHabitacion;
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -54,17 +55,25 @@ public class MainActivity extends AppCompatActivity {
         prefs = getSharedPreferences("tamagotchi", MODE_PRIVATE);
         editor = prefs.edit();
 
+        GameData.monedas = prefs.getInt("monedas",0);
+
         int hambre = prefs.getInt("hambre",50);
         int energia = prefs.getInt("energia", 50);
         int felicidad = prefs.getInt("felicidad", 50);
 
         finTiempoGracia = prefs.getLong("finTiempoGracia", 0);
 
+
+
         mascota.setHambre(hambre);
         mascota.setEnergia(energia);
         mascota.setFelicidad(felicidad);
 
         // Referencias UI
+        txtMonedas = findViewById(R.id.txtMonedas);
+        txtMonedas.setText(String.valueOf(GameData.monedas));
+        txtHabitacion = findViewById(R.id.txtHabitacion);
+        txtHabitacion.setText("Cocina");
         imgComida = findViewById(R.id.imgComida);
         imgMascota = findViewById(R.id.imgMascota);
 
@@ -103,8 +112,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Eventos
         btnAlimentar.setOnClickListener(v -> {
-            activartiempodegracia();
-            mascota.alimentar(100);
+            GameData.monedas = GameData.monedas + 5;
             actualizarUI();
         });
 
@@ -123,14 +131,18 @@ public class MainActivity extends AppCompatActivity {
         btnFlecha1.setOnClickListener(v -> {
             viewFlipper.setInAnimation(this, R.anim.slide_in_left);
             viewFlipper.setOutAnimation(this, R.anim.slide_out_right);
-
+            if(habitacionActual>0) habitacionActual--;
+            else habitacionActual=2;
+            actualizarUI();
             viewFlipper.showPrevious();
         });
 
         btnFlecha2.setOnClickListener(v -> {
             viewFlipper.setInAnimation(this, R.anim.slide_in_right);
             viewFlipper.setOutAnimation(this, R.anim.slide_out_left);
-
+            if(habitacionActual<2) habitacionActual++;
+            else habitacionActual=0;
+            actualizarUI();
             viewFlipper.showNext();
         });
         actualizarUI();
@@ -298,6 +310,7 @@ public class MainActivity extends AppCompatActivity {
                 .putLong("ultimoTiempo", tiempoActual)
                 .apply();
 
+        editor.putInt("monedas", GameData.monedas);
         editor.putInt("hambre", mascota.getHambre());
         editor.putInt("energia", mascota.getEnergia());
         editor.putInt("felicidad", mascota.getFelicidad());
@@ -310,6 +323,20 @@ public class MainActivity extends AppCompatActivity {
         actualizarStat(fillHambre, mascota.getHambre());
         actualizarStat(fillEnergia, mascota.getEnergia());
         actualizarStat(fillFelicidad, mascota.getFelicidad());
+        txtMonedas.setText(String.valueOf(GameData.monedas));
+
+        switch (habitacionActual) {
+            case 0:
+                txtHabitacion.setText("Cocina");
+                break;
+            case 1:
+                txtHabitacion.setText("Dormitorio");
+                break;
+            case 2:
+                txtHabitacion.setText("Sala de Juegos");
+                break;
+        }
+
     }
 
     private void aplicarTiempoFuera() {
@@ -326,7 +353,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void actualizarStat(View fillView, int valor) {
-        int alturaMax = 250; // mismo tamaño del cuadro
+        int alturaMax = 140; // mismo tamaño del cuadro
         int nuevaAltura = (alturaMax * valor) / 1000;
         ViewGroup.LayoutParams params = fillView.getLayoutParams();
         params.height = nuevaAltura;
