@@ -1,6 +1,7 @@
 package com.example.poupirata2;
 
 import android.annotation.SuppressLint;
+import android.app.Dialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -10,6 +11,7 @@ import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
@@ -39,7 +41,7 @@ public class MainActivity extends AppCompatActivity {
     SharedPreferences prefs;
     SharedPreferences.Editor editor;
     View fillHambre, fillEnergia, fillFelicidad;
-    FrameLayout boxHambre, boxEnergia, boxFelicidad, menuNevera;
+    FrameLayout boxHambre, boxEnergia, boxFelicidad;
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -76,12 +78,8 @@ public class MainActivity extends AppCompatActivity {
         //progressEnergia = findViewById(R.id.progressEnergia);
         //progressFelicidad = findViewById(R.id.progressFelicidad);
 
-        menuNevera = findViewById(R.id.menuNevera);
 
         btnNevera = findViewById(R.id.btnNevera);
-        btnManzana = findViewById(R.id.btnManzana);
-        btnPizza = findViewById(R.id.btnPizza);
-        btnHamburguesa = findViewById(R.id.btnHamburguesa);
         btnAlimentar = findViewById(R.id.btnAlimentar);
         btnDormir = findViewById(R.id.btnDormir);
         btnJugar = findViewById(R.id.btnJugar);
@@ -138,7 +136,53 @@ public class MainActivity extends AppCompatActivity {
         actualizarUI();
 
         btnNevera.setOnClickListener(v -> {
-            menuNevera.setVisibility(View.VISIBLE);
+            Dialog dialognevera = new Dialog(MainActivity.this);
+
+            dialognevera.setContentView(R.layout.dialog_nevera);
+
+            btnManzana = dialognevera.findViewById(R.id.btnManzana);
+            btnPizza = dialognevera.findViewById(R.id.btnPizza);
+            btnHamburguesa = dialognevera.findViewById(R.id.btnHamburguesa);
+
+            btnManzana.setOnClickListener(view -> {
+                imgComida.setImageResource(R.drawable.ic_manzana);
+                comidaActual = 1;
+                dialognevera.dismiss();
+            });
+            btnPizza.setOnClickListener(view -> {
+                imgComida.setImageResource(R.drawable.ic_pizza);
+                comidaActual = 2;
+                dialognevera.dismiss();
+            });
+            btnHamburguesa.setOnClickListener(view -> {
+                imgComida.setImageResource(R.drawable.ic_comida);
+                comidaActual = 0;
+                dialognevera.dismiss();
+            });
+
+            dialognevera.show();
+            Window windownevera = dialognevera.getWindow();
+
+            if (windownevera != null) {
+
+                int width = (int)(getResources()
+                        .getDisplayMetrics().widthPixels * 0.9);
+
+                int height = (int)(getResources()
+                        .getDisplayMetrics().heightPixels * 0.8);
+
+                windownevera.setLayout(width, height);
+
+                windownevera.setBackgroundDrawableResource(
+                        android.R.color.transparent
+                );
+            }
+
+            dialognevera.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+          /*  dialognevera.getWindow().setLayout(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+            );*/
         });
 
         btnMinigame.setOnClickListener(v ->{
@@ -147,21 +191,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
-        btnManzana.setOnClickListener(v -> {
-            imgComida.setImageResource(R.drawable.ic_manzana);
-            comidaActual = 1;
-            menuNevera.setVisibility(View.GONE);
-        });
-        btnPizza.setOnClickListener(v -> {
-            imgComida.setImageResource(R.drawable.ic_pizza);
-            comidaActual = 2;
-            menuNevera.setVisibility(View.GONE);
-        });
-        btnHamburguesa.setOnClickListener(v -> {
-            imgComida.setImageResource(R.drawable.ic_comida);
-            comidaActual = 0;
-            menuNevera.setVisibility(View.GONE);
-        });
+
 
 
 
