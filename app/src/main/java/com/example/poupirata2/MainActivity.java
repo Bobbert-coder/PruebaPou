@@ -37,6 +37,7 @@ public class MainActivity extends AppCompatActivity {
     private LinearLayout mainLayout;
     RecyclerView recyclerFoods;
     ArrayList<Food> foods = new ArrayList<>();
+    Food comidaSeleccionada = null;
 
     ViewFlipper viewFlipper;
     ImageButton btnFlecha1, btnFlecha2, btnManzana, btnPizza, btnHamburguesa;
@@ -56,6 +57,11 @@ public class MainActivity extends AppCompatActivity {
     @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+        if(GameData.inventario.isEmpty()) {
+            GameData.inventario.add(new Food("Manzana", 5, R.drawable.ic_manzana, 1, 100));
+            GameData.inventario.add(new Food("Pizza", 10, R.drawable.ic_pizza, 1, 500));
+        }
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
@@ -124,7 +130,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Eventos
         btnAlimentar.setOnClickListener(v -> {
-            GameData.monedas = GameData.monedas + 5;
+            GameData.monedas = GameData.monedas + 100;
             actualizarUI();
         });
 
@@ -172,7 +178,7 @@ public class MainActivity extends AppCompatActivity {
             recyclerFoods.setAdapter(adapter);
 
             if (windowtienda != null) {
-                int width = (int)(getResources().getDisplayMetrics().widthPixels * 0.9);
+                int width = (int)(getResources().getDisplayMetrics().widthPixels);
                 int height = (int)(getResources().getDisplayMetrics().heightPixels * 0.8);
                 windowtienda.setLayout(width, height);
                 windowtienda.setBackgroundDrawableResource(android.R.color.transparent);
@@ -180,51 +186,46 @@ public class MainActivity extends AppCompatActivity {
         });
 
         btnNevera.setOnClickListener(v -> {
+
             Dialog dialognevera = new Dialog(MainActivity.this);
+
             dialognevera.setContentView(R.layout.dialog_nevera);
-            btnManzana = dialognevera.findViewById(R.id.btnManzana);
-            btnPizza = dialognevera.findViewById(R.id.btnPizza);
-            btnHamburguesa = dialognevera.findViewById(R.id.btnHamburguesa);
+            RecyclerView recyclerNevera = dialognevera.findViewById(R.id.recyclerNevera);
 
-            btnManzana.setOnClickListener(view -> {
-                imgComida.setImageResource(R.drawable.ic_manzana);
-                comidaActual = 1;
-                dialognevera.dismiss();
-            });
-            btnPizza.setOnClickListener(view -> {
-                imgComida.setImageResource(R.drawable.ic_pizza);
-                comidaActual = 2;
-                dialognevera.dismiss();
-            });
-            btnHamburguesa.setOnClickListener(view -> {
-                imgComida.setImageResource(R.drawable.ic_comida);
-                comidaActual = 0;
-                dialognevera.dismiss();
-            });
+            recyclerNevera.setLayoutManager(new LinearLayoutManager(this));
 
+            // Lista SOLO con comidas disponibles
+            ArrayList<Food> comidasDisponibles = new ArrayList<>();
+
+            for(Food food : GameData.inventario) {
+                if(food.getCantidad() > 0) {
+                    comidasDisponibles.add(food);
+                }
+            }
+            // Adapter
+            FoodAdapterNevera adapter =
+                    new FoodAdapterNevera(
+                            this,
+                            comidasDisponibles,
+                            food -> {
+                                // Cambiar comida visible
+                                imgComida.setImageResource(food.getImagen());
+                                comidaSeleccionada = food;
+                                Toast.makeText(this, "Seleccionaste " + food.getNombre(), Toast.LENGTH_SHORT).show();
+                            }
+                    );
+
+            recyclerNevera.setAdapter(adapter);
             dialognevera.show();
             Window windownevera = dialognevera.getWindow();
 
-            if (windownevera != null) {
+            if(windownevera != null) {
+                int width = (int)(getResources().getDisplayMetrics().widthPixels);
 
-                int width = (int)(getResources()
-                        .getDisplayMetrics().widthPixels * 0.9);
-
-                int height = (int)(getResources()
-                        .getDisplayMetrics().heightPixels * 0.8);
-
+                int height = (int)(getResources().getDisplayMetrics().heightPixels * 0.7);
                 windownevera.setLayout(width, height);
-
-                windownevera.setBackgroundDrawableResource(
-                        android.R.color.transparent
-                );
+                windownevera.setBackgroundDrawableResource(android.R.color.transparent);
             }
-
-            dialognevera.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
-          /*  dialognevera.getWindow().setLayout(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT
-            );*/
         });
 
         btnMinigame.setOnClickListener(v ->{
@@ -253,23 +254,18 @@ public class MainActivity extends AppCompatActivity {
                         break;
                     case MotionEvent.ACTION_UP:
                         if (colisionaConMascota(view, imgMascota)) {
+                            if(comidaSeleccionada != null) {
+                                mascota.alimentar(comidaSeleccionada.getHambre());
+                                comidaSeleccionada.setCantidad(comidaSeleccionada.getCantidad() - 1);
 
-                            switch (comidaActual) {
-                                case 1:
-                                    mascota.alimentar(100);
-                                    break;
-                                case 2:
-                                    mascota.alimentar(500);
-                                    break;
-                                case 0:
-                                    mascota.alimentar(250);
-                                    break;
+                                if(comidaSeleccionada.getCantidad() <= 0) {
+                                    comidaSeleccionada = null;
+                                    imgComida.setImageResource(0);
+                                }
+                                activartiempodegracia();
+                                actualizarUI();
+                                Toast.makeText(MainActivity.this, "Ñam ñam", Toast.LENGTH_SHORT).show();
                             }
-                            activartiempodegracia();
-                            actualizarUI();
-                            Toast.makeText(MainActivity.this,
-                                    "Ñam ñam",
-                                    Toast.LENGTH_SHORT).show();
                         }
                         view.animate()
                                 .x(comidaX[0])
@@ -404,11 +400,9 @@ public class MainActivity extends AppCompatActivity {
 
     private void crearcomidas()
     {
-        foods.add(new Food("Manzana", 5, R.drawable.ic_manzana, 0));
-
-        foods.add(new Food("Pizza", 10, R.drawable.ic_pizza, 0));
-
-        foods.add(new Food("Hamburguesa", 15, R.drawable.ic_comida, 0));
+        foods.add(new Food("Manzana", 5, R.drawable.ic_manzana, 0, 100));
+        foods.add(new Food("Pizza", 10, R.drawable.ic_pizza, 0, 500));
+        foods.add(new Food("Hamburguesa", 15, R.drawable.ic_comida, 0, 250));
     }
 
 }

@@ -1,13 +1,13 @@
 package com.example.poupirata2;
 
+import java.util.ArrayList;
+
 public class GameData {
 
 
     public static int monedas;
 
-    public static int manzanas = 0;
-    public static int pizzas = 0;
-    public static int hamburguesas = 0;
+    public static ArrayList<Food> inventario = new ArrayList<>();
 
     public boolean comprar(int cantidad)
     {

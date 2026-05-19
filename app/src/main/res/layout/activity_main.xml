@@ -26,8 +26,8 @@
             <ImageView
                 android:id="@+id/imgComida"
                 android:layout_width="80dp"
-                android:layout_height="80dp"
                 android:src="@drawable/ic_comida"
+                android:layout_height="80dp"
                 android:layout_gravity="bottom|center_horizontal"
                 android:layout_margin="150dp"/>
 
@@ -43,7 +43,7 @@
                     android:id="@+id/btnAlimentar"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Alimentar"
+                    android:text="Monedas"
                     android:background="@drawable/button_style"
                     android:textColor="#FFFFFF"
                     android:textStyle="bold"

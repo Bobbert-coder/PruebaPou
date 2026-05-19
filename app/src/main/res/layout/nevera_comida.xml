@@ -5,13 +5,13 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:gravity="center_vertical"
-    android:padding="10dp">
+    android:padding="10dp"
+    android:gravity="center_vertical">
 
     <ImageView
         android:id="@+id/imgFood"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
         android:scaleType="centerInside"/>
 
     <LinearLayout
@@ -30,18 +30,16 @@
             android:textStyle="bold"/>
 
         <TextView
-            android:id="@+id/txtPrecio"
+            android:id="@+id/txtCantidad"
+            android:textSize="12sp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="12sp"
             android:textColor="#CCCCCC"/>
-
     </LinearLayout>
 
     <Button
-        android:id="@+id/btnComprar"
+        android:id="@+id/btnUsar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Comprar"/>
-
+        android:text="Usar"/>
 </LinearLayout>

@@ -28,8 +28,7 @@ public class FoodAdapter extends RecyclerView.Adapter<FoodAdapter.FoodViewHolder
     @Override
     public FoodViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
 
-        View view = LayoutInflater.from(context)
-                .inflate(R.layout.item_comida, parent, false);
+        View view = LayoutInflater.from(context).inflate(R.layout.item_comida, parent, false);
 
         return new FoodViewHolder(view);
     }
@@ -44,26 +43,28 @@ public class FoodAdapter extends RecyclerView.Adapter<FoodAdapter.FoodViewHolder
         holder.txtPrecio.setText(
                 "Precio: " + food.getPrecio()
         );
-
         holder.imgFood.setImageResource(food.getImagen());
 
         holder.btnComprar.setOnClickListener(v -> {
-
-            if(GameData.monedas >= food.getPrecio()){
-
+            if(GameData.monedas >= food.getPrecio()) {
                 GameData.monedas -= food.getPrecio();
-
-                food.setCantidad(food.getCantidad() + 1);
-
-                Toast.makeText(context,
-                        "Compraste " + food.getNombre(),
-                        Toast.LENGTH_SHORT).show();
-
-            } else {
-
-                Toast.makeText(context,
-                        "No tienes monedas",
-                        Toast.LENGTH_SHORT).show();
+                boolean existe = false;
+                // Buscar si ya existe en inventario
+                for(Food inventarioFood : GameData.inventario) {
+                    if(inventarioFood.getNombre().equals(food.getNombre())) {
+                        inventarioFood.setCantidad(inventarioFood.getCantidad() + 1);
+                        existe = true;
+                        break;
+                    }
+                }
+                // Si no existe, agregar nueva comida
+                if(!existe) {
+                    GameData.inventario.add(new Food(food.getNombre(), food.getPrecio(), food.getImagen(), 1, food.getHambre()));
+                }
+                Toast.makeText(context, "Compraste " + food.getNombre(), Toast.LENGTH_SHORT).show();
+            }
+            else {
+                Toast.makeText(context, "No tienes monedas suficientes", Toast.LENGTH_SHORT).show();
             }
         });
     }

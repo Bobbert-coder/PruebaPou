@@ -6,12 +6,14 @@ public class Food {
     private int precio;
     private int imagen;
     private int cantidad;
+    private int hambre;
 
-    public Food(String nombre, int precio, int imagen, int cantidad) {
+    public Food(String nombre, int precio, int imagen, int cantidad, int hambre) {
         this.nombre = nombre;
-        this.precio = precio;
         this.imagen = imagen;
+        this.precio = precio;
         this.cantidad = cantidad;
+        this.hambre = hambre;
     }
 
     public String getNombre() {
@@ -20,6 +22,9 @@ public class Food {
 
     public int getPrecio() {
         return precio;
+    }
+    public int getHambre() {
+        return hambre;
     }
 
     public int getImagen() {
