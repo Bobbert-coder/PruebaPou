@@ -1,6 +1,7 @@
 package com.example.poupirata2;
 
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -20,21 +21,29 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import android.os.Handler;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
 
+import java.util.ArrayList;
+
 public class MainActivity extends AppCompatActivity {
     int comidaActual = 0, habitacionActual=0;
     ImageView imgComida, imgMascota;
     private LinearLayout mainLayout;
+    RecyclerView recyclerFoods;
+    ArrayList<Food> foods = new ArrayList<>();
+
     ViewFlipper viewFlipper;
     ImageButton btnFlecha1, btnFlecha2, btnManzana, btnPizza, btnHamburguesa;
     Handler handler = new Handler();
     Runnable runnable;
     boolean isRun = true;
-    Button btnAlimentar, btnDormir, btnJugar, btnNevera, btnMinigame;
+    Button btnAlimentar, btnDormir, btnJugar, btnNevera, btnMinigame, btnTienda;
     private long finTiempoGracia = 0;
 
     Mascota mascota;
@@ -47,8 +56,11 @@ public class MainActivity extends AppCompatActivity {
     @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        //crear comidas
+        crearcomidas();
         // Inicializar mascota
         mascota = new Mascota();
 
@@ -87,7 +99,7 @@ public class MainActivity extends AppCompatActivity {
         //progressEnergia = findViewById(R.id.progressEnergia);
         //progressFelicidad = findViewById(R.id.progressFelicidad);
 
-
+        btnTienda = findViewById(R.id.btnTienda);
         btnNevera = findViewById(R.id.btnNevera);
         btnAlimentar = findViewById(R.id.btnAlimentar);
         btnDormir = findViewById(R.id.btnDormir);
@@ -147,11 +159,29 @@ public class MainActivity extends AppCompatActivity {
         });
         actualizarUI();
 
+        btnTienda.setOnClickListener(v -> {
+
+            Dialog dialogtienda = new Dialog(MainActivity.this);
+            dialogtienda.setContentView(R.layout.dialog_tienda);
+            dialogtienda.show();
+
+            Window windowtienda = dialogtienda.getWindow();
+            RecyclerView recyclerFoods = dialogtienda.findViewById(R.id.recyclerFoods);
+            recyclerFoods.setLayoutManager(new LinearLayoutManager(this));
+            FoodAdapter adapter = new FoodAdapter(this, foods);
+            recyclerFoods.setAdapter(adapter);
+
+            if (windowtienda != null) {
+                int width = (int)(getResources().getDisplayMetrics().widthPixels * 0.9);
+                int height = (int)(getResources().getDisplayMetrics().heightPixels * 0.8);
+                windowtienda.setLayout(width, height);
+                windowtienda.setBackgroundDrawableResource(android.R.color.transparent);
+            }
+        });
+
         btnNevera.setOnClickListener(v -> {
             Dialog dialognevera = new Dialog(MainActivity.this);
-
             dialognevera.setContentView(R.layout.dialog_nevera);
-
             btnManzana = dialognevera.findViewById(R.id.btnManzana);
             btnPizza = dialognevera.findViewById(R.id.btnPizza);
             btnHamburguesa = dialognevera.findViewById(R.id.btnHamburguesa);
@@ -201,11 +231,6 @@ public class MainActivity extends AppCompatActivity {
             Intent intent = new Intent(MainActivity.this, MiniGameActivity.class);
             startActivity(intent);
         });
-
-
-
-
-
 
 
 
@@ -375,6 +400,15 @@ public class MainActivity extends AppCompatActivity {
         Rect rectMascota = new Rect();
         mascota.getHitRect(rectMascota);
         return Rect.intersects(rectComida, rectMascota);
+    }
+
+    private void crearcomidas()
+    {
+        foods.add(new Food("Manzana", 5, R.drawable.ic_manzana, 0));
+
+        foods.add(new Food("Pizza", 10, R.drawable.ic_pizza, 0));
+
+        foods.add(new Food("Hamburguesa", 15, R.drawable.ic_comida, 0));
     }
 
 }

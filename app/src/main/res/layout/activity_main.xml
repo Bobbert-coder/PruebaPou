@@ -406,7 +406,15 @@
             android:src="@drawable/ic_mascota"
             android:layout_marginBottom="20dp"/>
 
+
+
     </LinearLayout>
 
+    <Button
+        android:id="@+id/btnTienda"
+        android:layout_width="100dp"
+        android:layout_height="50dp"
+        android:layout_gravity="bottom|right"
+        android:text="Tienda"/>
 
 </FrameLayout>
