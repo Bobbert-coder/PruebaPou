@@ -1,6 +1,7 @@
 package com.example.poupirata2;
 
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -20,21 +21,30 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import android.os.Handler;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
 
+import java.util.ArrayList;
+
 public class MainActivity extends AppCompatActivity {
-    int comidaActual = 0;
+    int comidaActual = 0, habitacionActual=0;
     ImageView imgComida, imgMascota;
     private LinearLayout mainLayout;
+    RecyclerView recyclerFoods;
+    ArrayList<Food> foods = new ArrayList<>();
+    Food comidaSeleccionada = null;
+
     ViewFlipper viewFlipper;
     ImageButton btnFlecha1, btnFlecha2, btnManzana, btnPizza, btnHamburguesa;
     Handler handler = new Handler();
     Runnable runnable;
     boolean isRun = true;
-    Button btnAlimentar, btnDormir, btnJugar, btnNevera, btnMinigame;
+    Button btnAlimentar, btnDormir, btnJugar, btnNevera, btnMinigame, btnTienda;
     private long finTiempoGracia = 0;
 
     Mascota mascota;
@@ -42,17 +52,28 @@ public class MainActivity extends AppCompatActivity {
     SharedPreferences.Editor editor;
     View fillHambre, fillEnergia, fillFelicidad;
     FrameLayout boxHambre, boxEnergia, boxFelicidad;
+    TextView txtMonedas, txtHabitacion;
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+        if(GameData.inventario.isEmpty()) {
+            GameData.inventario.add(new Food("Manzana", 5, R.drawable.ic_manzana, 1, 100));
+            GameData.inventario.add(new Food("Pizza", 10, R.drawable.ic_pizza, 1, 500));
+        }
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        //crear comidas
+        crearcomidas();
         // Inicializar mascota
         mascota = new Mascota();
 
         prefs = getSharedPreferences("tamagotchi", MODE_PRIVATE);
         editor = prefs.edit();
+
+        GameData.monedas = prefs.getInt("monedas",0);
 
         int hambre = prefs.getInt("hambre",50);
         int energia = prefs.getInt("energia", 50);
@@ -60,11 +81,17 @@ public class MainActivity extends AppCompatActivity {
 
         finTiempoGracia = prefs.getLong("finTiempoGracia", 0);
 
+
+
         mascota.setHambre(hambre);
         mascota.setEnergia(energia);
         mascota.setFelicidad(felicidad);
 
         // Referencias UI
+        txtMonedas = findViewById(R.id.txtMonedas);
+        txtMonedas.setText(String.valueOf(GameData.monedas));
+        txtHabitacion = findViewById(R.id.txtHabitacion);
+        txtHabitacion.setText("Cocina");
         imgComida = findViewById(R.id.imgComida);
         imgMascota = findViewById(R.id.imgMascota);
 
@@ -78,7 +105,7 @@ public class MainActivity extends AppCompatActivity {
         //progressEnergia = findViewById(R.id.progressEnergia);
         //progressFelicidad = findViewById(R.id.progressFelicidad);
 
-
+        btnTienda = findViewById(R.id.btnTienda);
         btnNevera = findViewById(R.id.btnNevera);
         btnAlimentar = findViewById(R.id.btnAlimentar);
         btnDormir = findViewById(R.id.btnDormir);
@@ -103,8 +130,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Eventos
         btnAlimentar.setOnClickListener(v -> {
-            activartiempodegracia();
-            mascota.alimentar(100);
+            GameData.monedas = GameData.monedas + 100;
             actualizarUI();
         });
 
@@ -123,77 +149,89 @@ public class MainActivity extends AppCompatActivity {
         btnFlecha1.setOnClickListener(v -> {
             viewFlipper.setInAnimation(this, R.anim.slide_in_left);
             viewFlipper.setOutAnimation(this, R.anim.slide_out_right);
-
+            if(habitacionActual>0) habitacionActual--;
+            else habitacionActual=2;
+            actualizarUI();
             viewFlipper.showPrevious();
         });
 
         btnFlecha2.setOnClickListener(v -> {
             viewFlipper.setInAnimation(this, R.anim.slide_in_right);
             viewFlipper.setOutAnimation(this, R.anim.slide_out_left);
-
+            if(habitacionActual<2) habitacionActual++;
+            else habitacionActual=0;
+            actualizarUI();
             viewFlipper.showNext();
         });
         actualizarUI();
 
+        btnTienda.setOnClickListener(v -> {
+
+            Dialog dialogtienda = new Dialog(MainActivity.this);
+            dialogtienda.setContentView(R.layout.dialog_tienda);
+            dialogtienda.show();
+
+            Window windowtienda = dialogtienda.getWindow();
+            RecyclerView recyclerFoods = dialogtienda.findViewById(R.id.recyclerFoods);
+            recyclerFoods.setLayoutManager(new LinearLayoutManager(this));
+            FoodAdapter adapter = new FoodAdapter(this, foods);
+            recyclerFoods.setAdapter(adapter);
+
+            if (windowtienda != null) {
+                int width = (int)(getResources().getDisplayMetrics().widthPixels);
+                int height = (int)(getResources().getDisplayMetrics().heightPixels * 0.8);
+                windowtienda.setLayout(width, height);
+                windowtienda.setBackgroundDrawableResource(android.R.color.transparent);
+            }
+        });
+
         btnNevera.setOnClickListener(v -> {
+
             Dialog dialognevera = new Dialog(MainActivity.this);
 
             dialognevera.setContentView(R.layout.dialog_nevera);
+            RecyclerView recyclerNevera = dialognevera.findViewById(R.id.recyclerNevera);
 
-            btnManzana = dialognevera.findViewById(R.id.btnManzana);
-            btnPizza = dialognevera.findViewById(R.id.btnPizza);
-            btnHamburguesa = dialognevera.findViewById(R.id.btnHamburguesa);
+            recyclerNevera.setLayoutManager(new LinearLayoutManager(this));
 
-            btnManzana.setOnClickListener(view -> {
-                imgComida.setImageResource(R.drawable.ic_manzana);
-                comidaActual = 1;
-                dialognevera.dismiss();
-            });
-            btnPizza.setOnClickListener(view -> {
-                imgComida.setImageResource(R.drawable.ic_pizza);
-                comidaActual = 2;
-                dialognevera.dismiss();
-            });
-            btnHamburguesa.setOnClickListener(view -> {
-                imgComida.setImageResource(R.drawable.ic_comida);
-                comidaActual = 0;
-                dialognevera.dismiss();
-            });
+            // Lista SOLO con comidas disponibles
+            ArrayList<Food> comidasDisponibles = new ArrayList<>();
 
+            for(Food food : GameData.inventario) {
+                if(food.getCantidad() > 0) {
+                    comidasDisponibles.add(food);
+                }
+            }
+            // Adapter
+            FoodAdapterNevera adapter =
+                    new FoodAdapterNevera(
+                            this,
+                            comidasDisponibles,
+                            food -> {
+                                // Cambiar comida visible
+                                imgComida.setImageResource(food.getImagen());
+                                comidaSeleccionada = food;
+                                Toast.makeText(this, "Seleccionaste " + food.getNombre(), Toast.LENGTH_SHORT).show();
+                            }
+                    );
+
+            recyclerNevera.setAdapter(adapter);
             dialognevera.show();
             Window windownevera = dialognevera.getWindow();
 
-            if (windownevera != null) {
+            if(windownevera != null) {
+                int width = (int)(getResources().getDisplayMetrics().widthPixels);
 
-                int width = (int)(getResources()
-                        .getDisplayMetrics().widthPixels * 0.9);
-
-                int height = (int)(getResources()
-                        .getDisplayMetrics().heightPixels * 0.8);
-
+                int height = (int)(getResources().getDisplayMetrics().heightPixels * 0.7);
                 windownevera.setLayout(width, height);
-
-                windownevera.setBackgroundDrawableResource(
-                        android.R.color.transparent
-                );
+                windownevera.setBackgroundDrawableResource(android.R.color.transparent);
             }
-
-            dialognevera.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
-          /*  dialognevera.getWindow().setLayout(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT
-            );*/
         });
 
         btnMinigame.setOnClickListener(v ->{
             Intent intent = new Intent(MainActivity.this, MiniGameActivity.class);
             startActivity(intent);
         });
-
-
-
-
-
 
 
 
@@ -216,23 +254,18 @@ public class MainActivity extends AppCompatActivity {
                         break;
                     case MotionEvent.ACTION_UP:
                         if (colisionaConMascota(view, imgMascota)) {
+                            if(comidaSeleccionada != null) {
+                                mascota.alimentar(comidaSeleccionada.getHambre());
+                                comidaSeleccionada.setCantidad(comidaSeleccionada.getCantidad() - 1);
 
-                            switch (comidaActual) {
-                                case 1:
-                                    mascota.alimentar(100);
-                                    break;
-                                case 2:
-                                    mascota.alimentar(500);
-                                    break;
-                                case 0:
-                                    mascota.alimentar(250);
-                                    break;
+                                if(comidaSeleccionada.getCantidad() <= 0) {
+                                    comidaSeleccionada = null;
+                                    imgComida.setImageResource(0);
+                                }
+                                activartiempodegracia();
+                                actualizarUI();
+                                Toast.makeText(MainActivity.this, "Ñam ñam", Toast.LENGTH_SHORT).show();
                             }
-                            activartiempodegracia();
-                            actualizarUI();
-                            Toast.makeText(MainActivity.this,
-                                    "Ñam ñam",
-                                    Toast.LENGTH_SHORT).show();
                         }
                         view.animate()
                                 .x(comidaX[0])
@@ -298,6 +331,7 @@ public class MainActivity extends AppCompatActivity {
                 .putLong("ultimoTiempo", tiempoActual)
                 .apply();
 
+        editor.putInt("monedas", GameData.monedas);
         editor.putInt("hambre", mascota.getHambre());
         editor.putInt("energia", mascota.getEnergia());
         editor.putInt("felicidad", mascota.getFelicidad());
@@ -310,6 +344,20 @@ public class MainActivity extends AppCompatActivity {
         actualizarStat(fillHambre, mascota.getHambre());
         actualizarStat(fillEnergia, mascota.getEnergia());
         actualizarStat(fillFelicidad, mascota.getFelicidad());
+        txtMonedas.setText(String.valueOf(GameData.monedas));
+
+        switch (habitacionActual) {
+            case 0:
+                txtHabitacion.setText("Cocina");
+                break;
+            case 1:
+                txtHabitacion.setText("Dormitorio");
+                break;
+            case 2:
+                txtHabitacion.setText("Sala de Juegos");
+                break;
+        }
+
     }
 
     private void aplicarTiempoFuera() {
@@ -326,7 +374,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void actualizarStat(View fillView, int valor) {
-        int alturaMax = 250; // mismo tamaño del cuadro
+        int alturaMax = 140; // mismo tamaño del cuadro
         int nuevaAltura = (alturaMax * valor) / 1000;
         ViewGroup.LayoutParams params = fillView.getLayoutParams();
         params.height = nuevaAltura;
@@ -348,6 +396,13 @@ public class MainActivity extends AppCompatActivity {
         Rect rectMascota = new Rect();
         mascota.getHitRect(rectMascota);
         return Rect.intersects(rectComida, rectMascota);
+    }
+
+    private void crearcomidas()
+    {
+        foods.add(new Food("Manzana", 5, R.drawable.ic_manzana, 0, 100));
+        foods.add(new Food("Pizza", 10, R.drawable.ic_pizza, 0, 500));
+        foods.add(new Food("Hamburguesa", 15, R.drawable.ic_comida, 0, 250));
     }
 
 }

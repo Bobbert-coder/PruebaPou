@@ -5,8 +5,6 @@
     android:id="@+id/activity_minigame"
     android:background="#87CEEB">
 
-
-
     <!-- Puntos -->
     <TextView
         android:id="@+id/txtScore"
@@ -35,5 +33,7 @@
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="40dp"/>
+
+    <include layout="@layout/layout_game_over"/>
 
 </RelativeLayout>
