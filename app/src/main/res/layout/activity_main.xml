@@ -5,6 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+
+
     <!-- FONDOS DESLIZABLES -->
     <ViewFlipper
         android:id="@+id/viewFlipper"
@@ -23,13 +25,15 @@
                 android:src="@drawable/fondo1"
                 android:scaleType="centerCrop"/>
 
+            <!--
             <ImageView
                 android:id="@+id/imgComida"
                 android:layout_width="80dp"
-                android:src="@drawable/ic_comida"
                 android:layout_height="80dp"
+                android:src="@drawable/ic_comida"
                 android:layout_gravity="bottom|center_horizontal"
-                android:layout_margin="150dp"/>
+                android:layout_margin="150dp"
+                android:translationZ="20dp"/> -->
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -167,8 +171,6 @@
 
         </FrameLayout>
 
-
-
     </ViewFlipper>
 
     <!-- UI ENCIMA -->
@@ -302,7 +304,19 @@
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"/>
+                android:layout_weight="1"
+                android:gravity="center">
+
+                <ImageButton
+                    android:id="@+id/btnTienda"
+                    android:src="@drawable/ic_tienda"
+                    android:scaleType="fitCenter"
+                    android:layout_width="70dp"
+                    android:layout_height="70dp"
+                    android:background="@android:color/transparent"
+                    android:layout_gravity="center"/>
+
+            </LinearLayout>
 
         </LinearLayout>
 
@@ -404,17 +418,18 @@
             android:layout_width="150dp"
             android:layout_height="150dp"
             android:src="@drawable/ic_mascota"
-            android:layout_marginBottom="20dp"/>
+            android:layout_marginBottom="20dp"
+            android:layout_gravity="center"
+            android:translationZ="10dp"/>
 
-
+        <ImageView
+            android:id="@+id/imgComida"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_gravity="bottom|center_horizontal"
+            android:layout_margin="80dp"
+            android:translationZ="20dp" />
 
     </LinearLayout>
-
-    <Button
-        android:id="@+id/btnTienda"
-        android:layout_width="100dp"
-        android:layout_height="50dp"
-        android:layout_gravity="bottom|right"
-        android:text="Tienda"/>
 
 </FrameLayout>

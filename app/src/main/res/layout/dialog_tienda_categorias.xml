@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="20dp"
+    android:background="#DD222222">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Tienda"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:textColor="#FFFFFF"
+        android:layout_gravity="center"/>
+
+    <Button
+        android:id="@+id/btnTiendaComida"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Comida"
+        android:layout_marginTop="20dp"/>
+
+    <Button
+        android:id="@+id/btnTiendaJuguetes"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Juguetes"
+        android:layout_marginTop="10dp"/>
+
+    <Button
+        android:id="@+id/btnTiendaDecoracion"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Decoración"
+        android:layout_marginTop="10dp"/>
+
+</LinearLayout>
