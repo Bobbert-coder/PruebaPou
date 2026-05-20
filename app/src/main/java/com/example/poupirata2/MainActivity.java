@@ -369,9 +369,9 @@ public class MainActivity extends AppCompatActivity {
         fillView.setLayoutParams(params);
         // Cambiar color según valor
 
-        if (valor > 60) {
+        if (valor > 600) {
             fillView.setBackgroundColor(Color.parseColor("#4CAF50"));
-        } else if (valor > 30) {
+        } else if (valor > 250) {
             fillView.setBackgroundColor(Color.parseColor("#FFC107"));
         } else {
             fillView.setBackgroundColor(Color.parseColor("#F44336"));
