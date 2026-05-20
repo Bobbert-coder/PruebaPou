@@ -312,9 +312,25 @@ public class MainActivity extends AppCompatActivity {
     private void guardarDatos() {
 
         long tiempoActual = System.currentTimeMillis();
-        prefs.edit()
-                .putLong("ultimoTiempo", tiempoActual)
-                .apply();
+        prefs.edit().putLong("ultimoTiempo", tiempoActual).apply();
+
+
+        for(Food food : GameData.inventario) {
+            switch(food.getNombre()) {
+                case "Manzana":
+                    editor.putInt("cantidad_manzana", food.getCantidad());
+                    break;
+                case "Pizza":
+                    editor.putInt("cantidad_pizza", food.getCantidad());
+                    break;
+                case "Hamburguesa":
+                    editor.putInt("cantidad_hamburguesa", food.getCantidad());
+                    break;
+                case "Sushi":
+                    editor.putInt("cantidad_sushi", food.getCantidad());
+                    break;
+            }
+        }
 
         editor.putInt("monedas", GameData.monedas);
         editor.putInt("hambre", mascota.getHambre());
