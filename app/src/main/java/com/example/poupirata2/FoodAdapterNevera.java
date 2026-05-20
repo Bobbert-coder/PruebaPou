@@ -25,11 +25,7 @@ public class FoodAdapterNevera
 
     OnFoodUseListener listener;
 
-    public FoodAdapterNevera(
-            Context context,
-            ArrayList<Food> foods,
-            OnFoodUseListener listener
-    ) {
+    public FoodAdapterNevera(Context context, ArrayList<Food> foods, OnFoodUseListener listener) {
         this.context = context;
         this.foods = foods;
         this.listener = listener;
@@ -37,33 +33,18 @@ public class FoodAdapterNevera
 
     @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(
-            @NonNull ViewGroup parent,
-            int viewType
-    ) {
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(context).inflate(R.layout.nevera_comida, parent, false);
         return new ViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(
-            @NonNull ViewHolder holder,
-            int position
-    ) {
-
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Food food = foods.get(position);
+        holder.txtNombre.setText(food.getNombre());
+        holder.txtCantidad.setText("Cantidad: " + food.getCantidad());
 
-        holder.txtNombre.setText(
-                food.getNombre()
-        );
-
-        holder.txtCantidad.setText(
-                "Cantidad: " + food.getCantidad()
-        );
-
-        holder.imgFood.setImageResource(
-                food.getImagen()
-        );
+        holder.imgFood.setImageResource(food.getImagen());
 
         holder.btnUsar.setOnClickListener(v -> {
 

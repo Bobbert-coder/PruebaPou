@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.GradientDrawable;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View;
@@ -38,13 +39,14 @@ public class MainActivity extends AppCompatActivity {
     RecyclerView recyclerFoods;
     ArrayList<Food> foods = new ArrayList<>();
     Food comidaSeleccionada = null;
+    MediaPlayer sonidoComer, sonidoLleno;
 
     ViewFlipper viewFlipper;
-    ImageButton btnFlecha1, btnFlecha2, btnManzana, btnPizza, btnHamburguesa;
+    ImageButton btnFlecha1, btnFlecha2, btnTienda;
     Handler handler = new Handler();
     Runnable runnable;
     boolean isRun = true;
-    Button btnAlimentar, btnDormir, btnJugar, btnNevera, btnMinigame, btnTienda;
+    Button btnAlimentar, btnDormir, btnJugar, btnNevera, btnMinigame;
     private long finTiempoGracia = 0;
 
     Mascota mascota;
@@ -80,31 +82,26 @@ public class MainActivity extends AppCompatActivity {
         int felicidad = prefs.getInt("felicidad", 50);
 
         finTiempoGracia = prefs.getLong("finTiempoGracia", 0);
-
-
-
         mascota.setHambre(hambre);
         mascota.setEnergia(energia);
         mascota.setFelicidad(felicidad);
-
         // Referencias UI
+        sonidoComer = MediaPlayer.create(this, R.raw.comida_comer);
+        sonidoLleno = MediaPlayer.create(this, R.raw.comida_llena);
+        sonidoComer.setVolume(0.3f, 0.3f);
+        sonidoLleno.setVolume(0.3f, 0.3f);
         txtMonedas = findViewById(R.id.txtMonedas);
         txtMonedas.setText(String.valueOf(GameData.monedas));
         txtHabitacion = findViewById(R.id.txtHabitacion);
         txtHabitacion.setText("Cocina");
         imgComida = findViewById(R.id.imgComida);
         imgMascota = findViewById(R.id.imgMascota);
-
         fillHambre = findViewById(R.id.fillHambre);
         fillEnergia = findViewById(R.id.fillEnergia);
         fillFelicidad = findViewById(R.id.fillFelicidad);
-
         boxFelicidad = findViewById(R.id.boxFelicidad);
         boxHambre = findViewById(R.id.boxHambre);
         boxEnergia = findViewById(R.id.boxEnergia);
-        //progressEnergia = findViewById(R.id.progressEnergia);
-        //progressFelicidad = findViewById(R.id.progressFelicidad);
-
         btnTienda = findViewById(R.id.btnTienda);
         btnNevera = findViewById(R.id.btnNevera);
         btnAlimentar = findViewById(R.id.btnAlimentar);
@@ -121,13 +118,10 @@ public class MainActivity extends AppCompatActivity {
             comidaX[0] = imgComida.getX();
             comidaY[0] = imgComida.getY();
         });
-
-
         mainLayout = findViewById(R.id.layoutMain);
         btnFlecha1 = findViewById(R.id.btnFlecha1);
         btnFlecha2 = findViewById(R.id.btnFlecha2);
         viewFlipper = findViewById(R.id.viewFlipper);
-
         // Eventos
         btnAlimentar.setOnClickListener(v -> {
             GameData.monedas = GameData.monedas + 100;
@@ -166,23 +160,17 @@ public class MainActivity extends AppCompatActivity {
         actualizarUI();
 
         btnTienda.setOnClickListener(v -> {
+            Dialog dialogCategorias = new Dialog(MainActivity.this);
+            dialogCategorias.setContentView(R.layout.dialog_tienda_categorias);
 
-            Dialog dialogtienda = new Dialog(MainActivity.this);
-            dialogtienda.setContentView(R.layout.dialog_tienda);
-            dialogtienda.show();
+            Button btnComida = dialogCategorias.findViewById(R.id.btnTiendaComida);
 
-            Window windowtienda = dialogtienda.getWindow();
-            RecyclerView recyclerFoods = dialogtienda.findViewById(R.id.recyclerFoods);
-            recyclerFoods.setLayoutManager(new LinearLayoutManager(this));
-            FoodAdapter adapter = new FoodAdapter(this, foods);
-            recyclerFoods.setAdapter(adapter);
-
-            if (windowtienda != null) {
-                int width = (int)(getResources().getDisplayMetrics().widthPixels);
-                int height = (int)(getResources().getDisplayMetrics().heightPixels * 0.8);
-                windowtienda.setLayout(width, height);
-                windowtienda.setBackgroundDrawableResource(android.R.color.transparent);
-            }
+            btnComida.setOnClickListener(v2 -> {
+                dialogCategorias.dismiss();
+                abrirTiendaComida();
+            });
+            dialogCategorias.show();
+            configurarDialog(dialogCategorias, 1f,1f);
         });
 
         btnNevera.setOnClickListener(v -> {
@@ -203,25 +191,18 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
             // Adapter
-            FoodAdapterNevera adapter =
-                    new FoodAdapterNevera(
-                            this,
-                            comidasDisponibles,
-                            food -> {
-                                // Cambiar comida visible
+            FoodAdapterNevera adapter = new FoodAdapterNevera(this, comidasDisponibles, food -> {
                                 imgComida.setImageResource(food.getImagen());
                                 comidaSeleccionada = food;
                                 Toast.makeText(this, "Seleccionaste " + food.getNombre(), Toast.LENGTH_SHORT).show();
-                            }
-                    );
+                            });
 
             recyclerNevera.setAdapter(adapter);
             dialognevera.show();
             Window windownevera = dialognevera.getWindow();
 
             if(windownevera != null) {
-                int width = (int)(getResources().getDisplayMetrics().widthPixels);
-
+                int width = (int)(getResources().getDisplayMetrics().widthPixels*0.95);
                 int height = (int)(getResources().getDisplayMetrics().heightPixels * 0.7);
                 windownevera.setLayout(width, height);
                 windownevera.setBackgroundDrawableResource(android.R.color.transparent);
@@ -255,16 +236,20 @@ public class MainActivity extends AppCompatActivity {
                     case MotionEvent.ACTION_UP:
                         if (colisionaConMascota(view, imgMascota)) {
                             if(comidaSeleccionada != null) {
-                                mascota.alimentar(comidaSeleccionada.getHambre());
-                                comidaSeleccionada.setCantidad(comidaSeleccionada.getCantidad() - 1);
-
-                                if(comidaSeleccionada.getCantidad() <= 0) {
-                                    comidaSeleccionada = null;
-                                    imgComida.setImageResource(0);
+                                if(mascota.getHambre() > 970) sonidoLleno.start();
+                                else
+                                {
+                                    mascota.alimentar(comidaSeleccionada.getHambre());
+                                    sonidoComer.start();
+                                    comidaSeleccionada.setCantidad(comidaSeleccionada.getCantidad() - 1);
+                                    if(comidaSeleccionada.getCantidad() <= 0) {
+                                        comidaSeleccionada = null;
+                                        imgComida.setImageResource(0);
+                                    }
+                                    activartiempodegracia();
+                                    actualizarUI();
+                                    Toast.makeText(MainActivity.this, "Ñam ñam", Toast.LENGTH_SHORT).show();
                                 }
-                                activartiempodegracia();
-                                actualizarUI();
-                                Toast.makeText(MainActivity.this, "Ñam ñam", Toast.LENGTH_SHORT).show();
                             }
                         }
                         view.animate()
@@ -349,12 +334,15 @@ public class MainActivity extends AppCompatActivity {
         switch (habitacionActual) {
             case 0:
                 txtHabitacion.setText("Cocina");
+                imgComida.setVisibility(View.VISIBLE);
                 break;
             case 1:
                 txtHabitacion.setText("Dormitorio");
+                imgComida.setVisibility(View.INVISIBLE);
                 break;
             case 2:
                 txtHabitacion.setText("Sala de Juegos");
+                imgComida.setVisibility(View.INVISIBLE);
                 break;
         }
 
@@ -401,8 +389,35 @@ public class MainActivity extends AppCompatActivity {
     private void crearcomidas()
     {
         foods.add(new Food("Manzana", 5, R.drawable.ic_manzana, 0, 100));
-        foods.add(new Food("Pizza", 10, R.drawable.ic_pizza, 0, 500));
         foods.add(new Food("Hamburguesa", 15, R.drawable.ic_comida, 0, 250));
+        foods.add(new Food("Pizza", 50, R.drawable.ic_pizza, 0, 500));
+        foods.add(new Food("Sushi", 100, R.drawable.ic_sushi, 0, 1000));
+    }
+
+    private void abrirTiendaComida() {
+
+        Dialog dialogtienda = new Dialog(MainActivity.this);
+        dialogtienda.setContentView(R.layout.dialog_tienda);
+        RecyclerView recyclerFoods = dialogtienda.findViewById(R.id.recyclerFoods);
+
+        recyclerFoods.setLayoutManager(new LinearLayoutManager(this));
+        FoodAdapter adapter = new FoodAdapter(this, foods);
+        recyclerFoods.setAdapter(adapter);
+        dialogtienda.show();
+        configurarDialog(dialogtienda, 1f,1f);
+    }
+
+    private void configurarDialog(Dialog dialog, float anchoPantalla, float altoPantalla) {
+
+        Window window = dialog.getWindow();
+        if(window != null) {
+
+            int width = (int)(getResources().getDisplayMetrics().widthPixels * anchoPantalla);
+            int height = (int)(getResources().getDisplayMetrics().heightPixels * altoPantalla);
+
+            window.setLayout(width, height);
+            window.setBackgroundDrawableResource(android.R.color.transparent);
+        }
     }
 
 }
