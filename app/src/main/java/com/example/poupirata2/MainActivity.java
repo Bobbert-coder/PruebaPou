@@ -34,7 +34,7 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
     int comidaActual = 0, habitacionActual=0;
-    ImageView imgComida, imgMascota;
+    ImageView imgComida, imgMascota, imgGorrito;
     private LinearLayout mainLayout;
     RecyclerView recyclerFoods;
     ArrayList<Food> foods = new ArrayList<>();
@@ -122,6 +122,7 @@ public class MainActivity extends AppCompatActivity {
         btnMinigame = findViewById(R.id.btnMinigame);
         btnLogros = findViewById(R.id.btnLogros);
         capaNoche = findViewById(R.id.capaNoche);
+        imgGorrito = findViewById(R.id.imgGorrito);
         final float[] comidaX = new float[1];
         final float[] comidaY = new float[1];
 
@@ -409,14 +410,33 @@ public class MainActivity extends AppCompatActivity {
 
     private void aplicarTiempoFuera() {
         long ultimoTiempo = prefs.getLong("ultimoTiempo", -1);
+
         if (ultimoTiempo != -1) {
             long tiempoActual = System.currentTimeMillis();
 
             long diferencia = tiempoActual - ultimoTiempo;
-            // Convertir a segundos
             int segundos = (int) (diferencia / 1000);
 
-            mascota.aplicarDesgastePorTiempo(segundos);
+            boolean estabaDurmiendo = prefs.getBoolean("durmiendo", false);
+
+            if (estabaDurmiendo) {
+                int energiaGanada = segundos * 10;
+
+                int nuevaEnergia = mascota.getEnergia() + energiaGanada;
+
+                if (nuevaEnergia > 1000) {
+                    nuevaEnergia = 1000;
+                }
+
+                mascota.setEnergia(nuevaEnergia);
+
+            } else {
+                mascota.aplicarDesgastePorTiempo(segundos);
+            }
+
+            prefs.edit()
+                    .putLong("ultimoTiempo", tiempoActual)
+                    .apply();
         }
     }
 
@@ -480,19 +500,25 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void empezarDormir() {
+
         durmiendo = true;
-        SharedPreferences prefs = getSharedPreferences(PREFS_DORMIR, MODE_PRIVATE);
-        prefs.edit().putBoolean(KEY_DURMIENDO, true).putLong(KEY_HORA_DORMIR, System.currentTimeMillis()).apply();
+        imgGorrito.setVisibility(ViewFlipper.VISIBLE);
+        prefs.edit()
+                .putBoolean("durmiendo", true)
+                .putLong("ultimoTiempo", System.currentTimeMillis())
+                .apply();
         capaNoche.setVisibility(View.VISIBLE);
         btnDormir.setText("☀️ Despertar");
         handlerDormir.postDelayed(subirEnergiaRunnable, 1000);
     }
 
     private void despertar() {
-        aplicarEnergiaMientrasEstuvoCerrada();
         durmiendo = false;
-        SharedPreferences prefs = getSharedPreferences(PREFS_DORMIR, MODE_PRIVATE);
-        prefs.edit().putBoolean(KEY_DURMIENDO, false).remove(KEY_HORA_DORMIR).apply();
+        imgGorrito.setVisibility(ViewFlipper.INVISIBLE);
+        prefs.edit()
+                .putBoolean("durmiendo", false)
+                .putLong("ultimoTiempo", System.currentTimeMillis())
+                .apply();
         capaNoche.setVisibility(View.GONE);
         btnDormir.setText("🌙 Dormir");
         handlerDormir.removeCallbacks(subirEnergiaRunnable);
@@ -514,39 +540,26 @@ public class MainActivity extends AppCompatActivity {
                 prefs.edit().putLong(KEY_HORA_DORMIR, System.currentTimeMillis()).apply();
                 actualizarUI();
                 activartiempodegracia();
-                handlerDormir.postDelayed(this, 1000);
+                handlerDormir.postDelayed(this, 50);
             } else {
-                despertar();
+                //despertar();
             }
         }
     };
-    private void aplicarEnergiaMientrasEstuvoCerrada() {
-        SharedPreferences prefs = getSharedPreferences(PREFS_DORMIR, MODE_PRIVATE);
-        boolean estabaDurmiendo = prefs.getBoolean(KEY_DURMIENDO, false);
-        long horaDormir = prefs.getLong(KEY_HORA_DORMIR, 0);
-        if (!estabaDurmiendo || horaDormir == 0) {
-            return;
-        }
-        long ahora = System.currentTimeMillis();
-        long tiempoPasado = ahora - horaDormir;
-        int segundosPasados = (int) (tiempoPasado / 50);
-        int energiaGanada = segundosPasados * ENERGIA_POR_SEGUNDO;
-        int nuevaEnergia = mascota.getEnergia() + energiaGanada;
-        if (nuevaEnergia > ENERGIA_MAXIMA) {
-            nuevaEnergia = ENERGIA_MAXIMA;
-        }
-        mascota.setEnergia(nuevaEnergia);
-        prefs.edit().putLong(KEY_HORA_DORMIR, ahora).apply();
-    }
+
     private void revisarSiSigueDurmiendo() {
-        SharedPreferences prefs = getSharedPreferences(PREFS_DORMIR, MODE_PRIVATE);
-        boolean estabaDurmiendo = prefs.getBoolean(KEY_DURMIENDO, false);
+
+        boolean estabaDurmiendo =
+                prefs.getBoolean("durmiendo", false);
         if (estabaDurmiendo) {
-            aplicarEnergiaMientrasEstuvoCerrada();
             durmiendo = true;
             capaNoche.setVisibility(View.VISIBLE);
+            imgGorrito.setVisibility(ViewFlipper.VISIBLE);
             btnDormir.setText("☀️ Despertar");
-            handlerDormir.postDelayed(subirEnergiaRunnable, 1000);
+            handlerDormir.postDelayed(
+                    subirEnergiaRunnable,
+                    1000
+            );
             actualizarUI();
         }
     }
