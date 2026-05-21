@@ -42,11 +42,11 @@ public class MainActivity extends AppCompatActivity {
     MediaPlayer sonidoComer, sonidoLleno;
 
     ViewFlipper viewFlipper;
-    ImageButton btnFlecha1, btnFlecha2, btnTienda;
+    ImageButton btnFlecha1, btnFlecha2, btnNevera, btnTienda;
     Handler handler = new Handler();
     Runnable runnable;
     boolean isRun = true;
-    Button btnAlimentar, btnDormir, btnJugar, btnNevera, btnMinigame;
+    Button btnAlimentar, btnDormir, btnJugar, btnMinigame;
     private long finTiempoGracia = 0;
 
     Mascota mascota;
@@ -60,10 +60,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
-        if(GameData.inventario.isEmpty()) {
-            GameData.inventario.add(new Food("Manzana", 5, R.drawable.ic_manzana, 1, 100));
-            GameData.inventario.add(new Food("Pizza", 10, R.drawable.ic_pizza, 1, 500));
-        }
+
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
@@ -80,6 +77,20 @@ public class MainActivity extends AppCompatActivity {
         int hambre = prefs.getInt("hambre",50);
         int energia = prefs.getInt("energia", 50);
         int felicidad = prefs.getInt("felicidad", 50);
+
+        if(GameData.inventario.isEmpty()) {
+
+            int cantidadManzana = prefs.getInt("cantidad_manzana", 1);
+            int cantidadPizza = prefs.getInt("cantidad_pizza", 1);
+            int cantidadHamburguesa = prefs.getInt("cantidad_hamburguesa", 1);
+            int cantidadSushi = prefs.getInt("cantidad_sushi",1);
+
+            GameData.inventario.add(new Food("Manzana", 5, R.drawable.ic_manzana, cantidadManzana, 100));
+            GameData.inventario.add(new Food("Hamburguesa", 15,R.drawable.ic_comida, cantidadHamburguesa, 250));
+            GameData.inventario.add(new Food("Pizza", 50, R.drawable.ic_pizza, cantidadPizza, 500));
+            GameData.inventario.add(new Food("Sushi", 100,R.drawable.ic_sushi, cantidadSushi, 1000));
+        }
+
 
         finTiempoGracia = prefs.getLong("finTiempoGracia", 0);
         mascota.setHambre(hambre);
@@ -305,6 +316,13 @@ public class MainActivity extends AppCompatActivity {
     {
         super.onResume();
         aplicarTiempoFuera();
+
+        if(GameData.felicidadExtra > 0) {
+            mascota.setFelicidad(mascota.getFelicidad()+ GameData.felicidadExtra);
+            Toast.makeText(this, "Tu mascota se divirtió 🎮", Toast.LENGTH_SHORT).show();
+            GameData.felicidadExtra = 0;
+        }
+
         actualizarUI();
         if (!isRun) handler.postDelayed(runnable, 5000);
     }

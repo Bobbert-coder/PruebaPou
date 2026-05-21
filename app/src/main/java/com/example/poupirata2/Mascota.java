@@ -21,7 +21,6 @@ public class Mascota {
         hambre = Math.max(hambre - 5, 0);
         felicidad = Math.max(felicidad - 2, 0);
     }
-
     public void reducirConTiempo() {
         hambre = Math.max(hambre - 5, 0);
         energia = Math.max(energia - 5, 0);

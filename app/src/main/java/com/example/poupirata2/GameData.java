@@ -6,6 +6,8 @@ public class GameData {
 
 
     public static int monedas;
+    public static int felicidadExtra = 0;
+    public static int energiaExtra = 0;
 
     public static ArrayList<Food> inventario = new ArrayList<>();
 
