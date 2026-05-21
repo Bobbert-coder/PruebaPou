@@ -57,6 +57,8 @@ public class MiniGameActivity extends AppCompatActivity {
                 layoutGameOver.setVisibility(View.VISIBLE);
 
                 GameData.felicidadExtra = score * 4;
+                LogrosManager.desbloquear(MiniGameActivity.this, LogrosManager.PRIMER_JUEGO);
+                LogrosManager.verificarPuntaje(MiniGameActivity.this, score);
 
             }
 

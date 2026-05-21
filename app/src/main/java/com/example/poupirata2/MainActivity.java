@@ -40,28 +40,31 @@ public class MainActivity extends AppCompatActivity {
     ArrayList<Food> foods = new ArrayList<>();
     Food comidaSeleccionada = null;
     MediaPlayer sonidoComer, sonidoLleno;
+    private static final String PREFS_DORMIR = "prefs_dormir";
+    private static final String KEY_DURMIENDO = "durmiendo";
+    private static final String KEY_HORA_DORMIR = "hora_dormir";
 
+    private static final int ENERGIA_POR_SEGUNDO = 10;
+    private static final int ENERGIA_MAXIMA = 1000;
     ViewFlipper viewFlipper;
     ImageButton btnFlecha1, btnFlecha2, btnNevera, btnTienda;
     Handler handler = new Handler();
     Runnable runnable;
     boolean isRun = true;
-    Button btnAlimentar, btnDormir, btnJugar, btnMinigame;
+    Button btnAlimentar, btnDormir, btnJugar, btnMinigame, btnLogros;
     private long finTiempoGracia = 0;
-
     Mascota mascota;
     SharedPreferences prefs;
     SharedPreferences.Editor editor;
-    View fillHambre, fillEnergia, fillFelicidad;
+    View fillHambre, fillEnergia, fillFelicidad, capaNoche;
+    Handler handlerDormir = new Handler();
+    boolean durmiendo = false;
     FrameLayout boxHambre, boxEnergia, boxFelicidad;
     TextView txtMonedas, txtHabitacion;
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
-
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         //crear comidas
@@ -90,8 +93,6 @@ public class MainActivity extends AppCompatActivity {
             GameData.inventario.add(new Food("Pizza", 50, R.drawable.ic_pizza, cantidadPizza, 500));
             GameData.inventario.add(new Food("Sushi", 100,R.drawable.ic_sushi, cantidadSushi, 1000));
         }
-
-
         finTiempoGracia = prefs.getLong("finTiempoGracia", 0);
         mascota.setHambre(hambre);
         mascota.setEnergia(energia);
@@ -119,8 +120,8 @@ public class MainActivity extends AppCompatActivity {
         btnDormir = findViewById(R.id.btnDormir);
         btnJugar = findViewById(R.id.btnJugar);
         btnMinigame = findViewById(R.id.btnMinigame);
-
-
+        btnLogros = findViewById(R.id.btnLogros);
+        capaNoche = findViewById(R.id.capaNoche);
         final float[] comidaX = new float[1];
         final float[] comidaY = new float[1];
 
@@ -138,17 +139,23 @@ public class MainActivity extends AppCompatActivity {
             GameData.monedas = GameData.monedas + 100;
             actualizarUI();
         });
-
         btnDormir.setOnClickListener(v -> {
-            activartiempodegracia();
-            mascota.dormir();
-            actualizarUI();
+            if (!durmiendo) {
+                empezarDormir();
+            } else {
+                despertar();
+            }
         });
 
         btnJugar.setOnClickListener(v -> {
             activartiempodegracia();
             mascota.jugar();
             actualizarUI();
+        });
+
+        btnLogros.setOnClickListener(v -> {
+            Intent intentlogros = new Intent(MainActivity.this, LogrosActivity.class);
+            startActivity(intentlogros);
         });
 
         btnFlecha1.setOnClickListener(v -> {
@@ -251,6 +258,20 @@ public class MainActivity extends AppCompatActivity {
                                 else
                                 {
                                     mascota.alimentar(comidaSeleccionada.getHambre());
+                                    LogrosManager.desbloquear(MainActivity.this, LogrosManager.PRIMER_ALIMENTO);
+
+                                    SharedPreferences prefs = getSharedPreferences("estadisticas", MODE_PRIVATE);
+
+                                    int vecesComidas = prefs.getInt("veces_comidas", 0);
+                                    vecesComidas++;
+                                    prefs.edit().putInt("veces_comidas", vecesComidas).apply();
+                                    if (vecesComidas >= 50) {
+                                        LogrosManager.desbloquear(
+                                                MainActivity.this,
+                                                LogrosManager.COMELON
+                                        );
+                                    }
+
                                     sonidoComer.start();
                                     comidaSeleccionada.setCantidad(comidaSeleccionada.getCantidad() - 1);
                                     if(comidaSeleccionada.getCantidad() <= 0) {
@@ -290,6 +311,9 @@ public class MainActivity extends AppCompatActivity {
             }
         };
         handler.postDelayed(runnable, 5000);
+
+        revisarSiSigueDurmiendo();
+
     }
 
     @Override
@@ -379,6 +403,7 @@ public class MainActivity extends AppCompatActivity {
                 imgComida.setVisibility(View.INVISIBLE);
                 break;
         }
+        LogrosManager.verificarLogros(this, mascota);
 
     }
 
@@ -451,6 +476,78 @@ public class MainActivity extends AppCompatActivity {
 
             window.setLayout(width, height);
             window.setBackgroundDrawableResource(android.R.color.transparent);
+        }
+    }
+
+    private void empezarDormir() {
+        durmiendo = true;
+        SharedPreferences prefs = getSharedPreferences(PREFS_DORMIR, MODE_PRIVATE);
+        prefs.edit().putBoolean(KEY_DURMIENDO, true).putLong(KEY_HORA_DORMIR, System.currentTimeMillis()).apply();
+        capaNoche.setVisibility(View.VISIBLE);
+        btnDormir.setText("☀️ Despertar");
+        handlerDormir.postDelayed(subirEnergiaRunnable, 1000);
+    }
+
+    private void despertar() {
+        aplicarEnergiaMientrasEstuvoCerrada();
+        durmiendo = false;
+        SharedPreferences prefs = getSharedPreferences(PREFS_DORMIR, MODE_PRIVATE);
+        prefs.edit().putBoolean(KEY_DURMIENDO, false).remove(KEY_HORA_DORMIR).apply();
+        capaNoche.setVisibility(View.GONE);
+        btnDormir.setText("🌙 Dormir");
+        handlerDormir.removeCallbacks(subirEnergiaRunnable);
+        actualizarUI();
+    }
+    private final Runnable subirEnergiaRunnable = new Runnable() {
+        @Override
+        public void run() {
+            if (!durmiendo) {
+                return;
+            }
+            if (mascota.getEnergia() < ENERGIA_MAXIMA) {
+                int nuevaEnergia = mascota.getEnergia() + ENERGIA_POR_SEGUNDO;
+                if (nuevaEnergia > ENERGIA_MAXIMA) {
+                    nuevaEnergia = ENERGIA_MAXIMA;
+                }
+                mascota.setEnergia(nuevaEnergia);
+                SharedPreferences prefs = getSharedPreferences(PREFS_DORMIR, MODE_PRIVATE);
+                prefs.edit().putLong(KEY_HORA_DORMIR, System.currentTimeMillis()).apply();
+                actualizarUI();
+                activartiempodegracia();
+                handlerDormir.postDelayed(this, 1000);
+            } else {
+                despertar();
+            }
+        }
+    };
+    private void aplicarEnergiaMientrasEstuvoCerrada() {
+        SharedPreferences prefs = getSharedPreferences(PREFS_DORMIR, MODE_PRIVATE);
+        boolean estabaDurmiendo = prefs.getBoolean(KEY_DURMIENDO, false);
+        long horaDormir = prefs.getLong(KEY_HORA_DORMIR, 0);
+        if (!estabaDurmiendo || horaDormir == 0) {
+            return;
+        }
+        long ahora = System.currentTimeMillis();
+        long tiempoPasado = ahora - horaDormir;
+        int segundosPasados = (int) (tiempoPasado / 50);
+        int energiaGanada = segundosPasados * ENERGIA_POR_SEGUNDO;
+        int nuevaEnergia = mascota.getEnergia() + energiaGanada;
+        if (nuevaEnergia > ENERGIA_MAXIMA) {
+            nuevaEnergia = ENERGIA_MAXIMA;
+        }
+        mascota.setEnergia(nuevaEnergia);
+        prefs.edit().putLong(KEY_HORA_DORMIR, ahora).apply();
+    }
+    private void revisarSiSigueDurmiendo() {
+        SharedPreferences prefs = getSharedPreferences(PREFS_DORMIR, MODE_PRIVATE);
+        boolean estabaDurmiendo = prefs.getBoolean(KEY_DURMIENDO, false);
+        if (estabaDurmiendo) {
+            aplicarEnergiaMientrasEstuvoCerrada();
+            durmiendo = true;
+            capaNoche.setVisibility(View.VISIBLE);
+            btnDormir.setText("☀️ Despertar");
+            handlerDormir.postDelayed(subirEnergiaRunnable, 1000);
+            actualizarUI();
         }
     }
 

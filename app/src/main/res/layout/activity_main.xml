@@ -96,23 +96,13 @@
                     android:id="@+id/btnDormir"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Dormir"
+                    android:text="🌙 Dormir"
                     android:background="@drawable/button_style"
                     android:textColor="#FFFFFF"
                     android:textStyle="bold"
                     android:backgroundTint="@null"
                     android:layout_marginStart="10dp"/>
 
-                <Button
-                    android:id="@+id/btnLogros"
-                    android:layout_width="120dp"
-                    android:layout_height="wrap_content"
-                    android:text="Coche"
-                    android:background="@drawable/button_style"
-                    android:textColor="#FFFFFF"
-                    android:textStyle="bold"
-                    android:backgroundTint="@null"
-                    android:layout_marginStart="10dp"/>
 
             </LinearLayout>
 
@@ -311,6 +301,12 @@
                 android:layout_weight="1"
                 android:gravity="center">
 
+                <Button
+                    android:id="@+id/btnLogros"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="🏆 Logros" />
+
                 <!--
 
                 <ImageButton
@@ -448,5 +444,12 @@
         android:layout_gravity="bottom|right"
         android:layout_marginBottom="20dp"
         android:layout_marginRight="20dp"/>
+
+    <View
+        android:id="@+id/capaNoche"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#B0000000"
+        android:visibility="gone"/>
 
 </FrameLayout>
