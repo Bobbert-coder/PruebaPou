@@ -15,11 +15,23 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.Button;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.Intent;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.Manifest;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.content.pm.PackageManager;
+import android.os.Build;
+
+import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -34,6 +46,7 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
     int comidaActual = 0, habitacionActual=0;
+    private static final int INTERVALO_DORMIR_MS = 1000;
     ImageView imgComida, imgMascota, imgGorrito;
     private LinearLayout mainLayout;
     RecyclerView recyclerFoods;
@@ -315,6 +328,20 @@ public class MainActivity extends AppCompatActivity {
 
         revisarSiSigueDurmiendo();
 
+        crearCanalNotificaciones();
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+                    != PackageManager.PERMISSION_GRANTED) {
+
+                ActivityCompat.requestPermissions(
+                        this,
+                        new String[]{Manifest.permission.POST_NOTIFICATIONS},
+                        100
+                );
+            }
+        }
+
     }
 
     @Override
@@ -409,31 +436,25 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void aplicarTiempoFuera() {
-        long ultimoTiempo = prefs.getLong("ultimoTiempo", -1);
 
+        long ultimoTiempo = prefs.getLong("ultimoTiempo", -1);
         if (ultimoTiempo != -1) {
             long tiempoActual = System.currentTimeMillis();
-
             long diferencia = tiempoActual - ultimoTiempo;
-            int segundos = (int) (diferencia / 1000);
-
+            int segundos = (int) (diferencia / INTERVALO_DORMIR_MS);
             boolean estabaDurmiendo = prefs.getBoolean("durmiendo", false);
 
             if (estabaDurmiendo) {
-                int energiaGanada = segundos * 10;
-
+                int energiaGanada = segundos * ENERGIA_POR_SEGUNDO;
                 int nuevaEnergia = mascota.getEnergia() + energiaGanada;
-
-                if (nuevaEnergia > 1000) {
-                    nuevaEnergia = 1000;
+                if (nuevaEnergia >= ENERGIA_MAXIMA) {
+                    nuevaEnergia = ENERGIA_MAXIMA;
                 }
-
                 mascota.setEnergia(nuevaEnergia);
 
             } else {
                 mascota.aplicarDesgastePorTiempo(segundos);
             }
-
             prefs.edit()
                     .putLong("ultimoTiempo", tiempoActual)
                     .apply();
@@ -500,28 +521,37 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void empezarDormir() {
-
         durmiendo = true;
-        imgGorrito.setVisibility(ViewFlipper.VISIBLE);
+
         prefs.edit()
                 .putBoolean("durmiendo", true)
                 .putLong("ultimoTiempo", System.currentTimeMillis())
                 .apply();
+
+        programarNotificacionEnergiaMaxima();
+
         capaNoche.setVisibility(View.VISIBLE);
+        imgGorrito.setVisibility(View.VISIBLE);
         btnDormir.setText("☀️ Despertar");
         handlerDormir.postDelayed(subirEnergiaRunnable, 1000);
     }
 
     private void despertar() {
         durmiendo = false;
-        imgGorrito.setVisibility(ViewFlipper.INVISIBLE);
+
+        cancelarNotificacionEnergiaMaxima();
+
         prefs.edit()
                 .putBoolean("durmiendo", false)
                 .putLong("ultimoTiempo", System.currentTimeMillis())
                 .apply();
+
         capaNoche.setVisibility(View.GONE);
+        imgGorrito.setVisibility(View.GONE);
         btnDormir.setText("🌙 Dormir");
+
         handlerDormir.removeCallbacks(subirEnergiaRunnable);
+
         actualizarUI();
     }
     private final Runnable subirEnergiaRunnable = new Runnable() {
@@ -532,18 +562,24 @@ public class MainActivity extends AppCompatActivity {
             }
             if (mascota.getEnergia() < ENERGIA_MAXIMA) {
                 int nuevaEnergia = mascota.getEnergia() + ENERGIA_POR_SEGUNDO;
-                if (nuevaEnergia > ENERGIA_MAXIMA) {
+                if (nuevaEnergia >= ENERGIA_MAXIMA) {
                     nuevaEnergia = ENERGIA_MAXIMA;
+                    mascota.setEnergia(nuevaEnergia);
+                    cancelarNotificacionEnergiaMaxima();
+                    despertar();
+                    return;
                 }
                 mascota.setEnergia(nuevaEnergia);
-                SharedPreferences prefs = getSharedPreferences(PREFS_DORMIR, MODE_PRIVATE);
-                prefs.edit().putLong(KEY_HORA_DORMIR, System.currentTimeMillis()).apply();
+                prefs.edit()
+                        .putLong("ultimoTiempo", System.currentTimeMillis())
+                        .apply();
                 actualizarUI();
                 activartiempodegracia();
-                handlerDormir.postDelayed(this, 50);
+                handlerDormir.postDelayed(this, INTERVALO_DORMIR_MS);
             } else {
-                //despertar();
-            }
+            cancelarNotificacionEnergiaMaxima();
+            despertar();
+        }
         }
     };
 
@@ -562,6 +598,63 @@ public class MainActivity extends AppCompatActivity {
             );
             actualizarUI();
         }
+    }
+
+    private void crearCanalNotificaciones() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel canal = new NotificationChannel(
+                    "canal_energia",
+                    "Energía",
+                    NotificationManager.IMPORTANCE_HIGH
+            );
+            canal.setDescription("Notificaciones de energía de la mascota");
+
+            NotificationManager manager = getSystemService(NotificationManager.class);
+            manager.createNotificationChannel(canal);
+        }
+    }
+
+    private void programarNotificacionEnergiaMaxima() {
+        int energiaActual = mascota.getEnergia();
+        if (energiaActual >= ENERGIA_MAXIMA) {
+            return;
+        }
+        int energiaFaltante = ENERGIA_MAXIMA - energiaActual;
+        int segundosNecesarios = energiaFaltante / ENERGIA_POR_SEGUNDO;
+
+        long tiempoNotificacion =
+                System.currentTimeMillis() + ((long) segundosNecesarios * INTERVALO_DORMIR_MS);
+
+        Intent intent = new Intent(this, EnergiaReceiver.class);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                this,
+                200,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+        );
+
+        AlarmManager alarmManager =
+                (AlarmManager) getSystemService(ALARM_SERVICE);
+
+        alarmManager.set(
+                AlarmManager.RTC_WAKEUP,
+                tiempoNotificacion,
+                pendingIntent
+        );
+    }
+
+    private void cancelarNotificacionEnergiaMaxima() {
+
+        Intent intent = new Intent(this, EnergiaReceiver.class);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                this,
+                200,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+        );
+        AlarmManager alarmManager =
+                (AlarmManager) getSystemService(ALARM_SERVICE);
+        alarmManager.cancel(pendingIntent);
     }
 
 }
