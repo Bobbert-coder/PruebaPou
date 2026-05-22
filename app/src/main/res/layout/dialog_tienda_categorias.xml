@@ -5,37 +5,100 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="20dp"
-    android:background="#DD222222">
+    android:padding="24dp"
+    android:background="#88000000"
+    android:layout_gravity="center_vertical">
 
+    <!-- Título -->
     <TextView
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Tienda"
-        android:textSize="24sp"
+        android:text="🛒 Tienda"
+        android:textSize="28sp"
         android:textStyle="bold"
-        android:textColor="#FFFFFF"
-        android:layout_gravity="center"/>
+        android:textColor="#D6D6D6"
+        android:gravity="center"
+        android:layout_marginBottom="25dp"/>
 
-    <Button
+    <!-- Botón comida -->
+    <LinearLayout
         android:id="@+id/btnTiendaComida"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Comida"
-        android:layout_marginTop="20dp"/>
+        android:layout_height="75dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:padding="18dp"
+        android:layout_marginBottom="15dp"
+        android:background="@drawable/bg_categoria_tienda">
 
-    <Button
-        android:id="@+id/btnTiendaJuguetes"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Juguetes"
-        android:layout_marginTop="10dp"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="🍔"
+            android:textSize="28sp"/>
 
-    <Button
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginStart="15dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Comida"
+                android:textColor="#D6D6D6"
+                android:textStyle="bold"
+                android:textSize="20sp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Compra alimentos para tu mascota"
+                android:textColor="#D6D6D6"
+                android:textSize="10sp"/>
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <!-- Botón decoración -->
+    <LinearLayout
         android:id="@+id/btnTiendaDecoracion"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Decoración"
-        android:layout_marginTop="10dp"/>
+        android:layout_height="75dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:padding="18dp"
+        android:background="@drawable/bg_categoria_tienda">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="🛋️"
+            android:textSize="28sp"/>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginStart="15dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Decoración"
+                android:textColor="#D6D6D6"
+                android:textStyle="bold"
+                android:textSize="20sp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Personaliza tu habitación"
+                android:textColor="#D6D6D6"
+                android:textSize="10sp"/>
+        </LinearLayout>
+
+    </LinearLayout>
 
 </LinearLayout>

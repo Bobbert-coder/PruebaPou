@@ -15,6 +15,7 @@
 
     <!-- FrameLayout Cocina -->
         <FrameLayout
+            android:id="@+id/contenedorDecoracionesCocina"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
@@ -24,16 +25,6 @@
                 android:layout_height="match_parent"
                 android:src="@drawable/fondo1"
                 android:scaleType="centerCrop"/>
-
-            <!--
-            <ImageView
-                android:id="@+id/imgComida"
-                android:layout_width="80dp"
-                android:layout_height="80dp"
-                android:src="@drawable/ic_comida"
-                android:layout_gravity="bottom|center_horizontal"
-                android:layout_margin="150dp"
-                android:translationZ="20dp"/> -->
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -74,8 +65,10 @@
 
         <!-- Frame Layout Dormitorio -->
         <FrameLayout
+            android:id="@+id/contenedorDecoracionesDormitorio"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
+
 
             <!-- Fondo -->
             <ImageView
@@ -109,8 +102,9 @@
         </FrameLayout>
 
 
-<!-- FrameLayout Sala de juegos-->
+        <!-- FrameLayout Sala de juegos-->
         <FrameLayout
+            android:id="@+id/contenedorDecoracionesSala"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
@@ -421,7 +415,7 @@
             android:layout_height="150dp"
             android:src="@drawable/ic_mascota"
             android:scaleType="centerCrop"
-            android:layout_marginBottom="20dp"
+            android:layout_marginTop="70dp"
             android:layout_gravity="center"
             android:translationZ="10dp"/>
 
@@ -441,7 +435,7 @@
         android:scaleType="fitCenter"
         android:layout_width="70dp"
         android:layout_height="70dp"
-        android:background="@android:color/transparent"
+        android:background="@drawable/button_style"
         android:layout_gravity="bottom|right"
         android:layout_marginBottom="20dp"
         android:layout_marginRight="20dp"/>

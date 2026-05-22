@@ -41,7 +41,7 @@ public class FoodAdapter extends RecyclerView.Adapter<FoodAdapter.FoodViewHolder
         holder.txtNombre.setText(food.getNombre());
 
         holder.txtPrecio.setText(
-                "Precio: " + food.getPrecio()
+                " " + food.getPrecio()
         );
         holder.imgFood.setImageResource(food.getImagen());
 

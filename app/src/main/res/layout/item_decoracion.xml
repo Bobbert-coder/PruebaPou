@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginBottom="14dp"
@@ -12,12 +11,11 @@
     android:background="@drawable/bg_item_comida">
 
     <ImageView
-        android:id="@+id/imgFood"
+        android:id="@+id/imgDecoracion"
         android:layout_width="70dp"
         android:layout_height="70dp"
         android:padding="8dp"
         android:scaleType="centerInside"
-        android:src="@drawable/ic_manzana"
         android:background="@drawable/bg_icono_comida" />
 
     <LinearLayout
@@ -28,45 +26,28 @@
         android:layout_marginStart="14dp">
 
         <TextView
-            android:id="@+id/txtNombre"
+            android:id="@+id/txtNombreDecoracion"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Manzana"
+            android:text="Decoración"
             android:textColor="#FFFFFF"
-            android:textSize="16sp"
+            android:textSize="19sp"
             android:textStyle="bold" />
 
-        <LinearLayout
+        <TextView
+            android:id="@+id/txtPrecioDecoracion"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <ImageView
-                android:layout_width="20dp"
-                android:layout_height="30dp"
-                android:src="@drawable/ic_moneda"
-                android:layout_gravity="center_vertical"/>
-
-            <TextView
-                android:id="@+id/txtPrecio"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text=""
-                android:textSize="14sp"
-                android:textColor="#FFE082"
-                android:textStyle="bold"
-                android:layout_marginTop="6dp" />
-
-
-
-        </LinearLayout>
-
-
+            android:text=" Monedas"
+            android:textSize="14sp"
+            android:textColor="#FFE082"
+            android:textStyle="bold"
+            android:layout_marginTop="6dp" />
 
     </LinearLayout>
 
     <Button
-        android:id="@+id/btnComprar"
+        android:id="@+id/btnComprarDecoracion"
         android:layout_width="96dp"
         android:layout_height="44dp"
         android:text="Comprar"
