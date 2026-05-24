@@ -15,7 +15,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import java.util.Random;
 
 public class MiniGameActivity extends AppCompatActivity {
-
     ImageView imgFood, imgPlayer;
     TextView txtScore;
     int aumento = 20;
@@ -30,6 +29,7 @@ public class MiniGameActivity extends AppCompatActivity {
     RelativeLayout layoutJuego;
     TextView txtFinalScore, txtGanadas;
     Button btnReiniciar;
+
 
     boolean gameOver = false;
 
@@ -52,9 +52,14 @@ public class MiniGameActivity extends AppCompatActivity {
                 handler.removeCallbacks(runnable);
 
                 txtFinalScore.setText("Puntos: " + score);
-                int ganancia = score/5;
+                int ganancia = score/2;
                 txtGanadas.setText(String.valueOf(ganancia));
                 layoutGameOver.setVisibility(View.VISIBLE);
+
+                GameData.felicidadExtra = score * 4;
+                LogrosManager.desbloquear(MiniGameActivity.this, LogrosManager.PRIMER_JUEGO);
+                LogrosManager.verificarPuntaje(MiniGameActivity.this, score);
+
             }
 
             // Colisión
@@ -101,7 +106,6 @@ public class MiniGameActivity extends AppCompatActivity {
 
 
         vidas = 3;
-
         layoutJuego = findViewById(R.id.activity_minigame);
         imgFood = findViewById(R.id.imgFood);
         reiniciarposicion();

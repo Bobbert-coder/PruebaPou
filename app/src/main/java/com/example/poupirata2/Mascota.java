@@ -21,7 +21,6 @@ public class Mascota {
         hambre = Math.max(hambre - 5, 0);
         felicidad = Math.max(felicidad - 2, 0);
     }
-
     public void reducirConTiempo() {
         hambre = Math.max(hambre - 5, 0);
         energia = Math.max(energia - 5, 0);
@@ -29,9 +28,7 @@ public class Mascota {
     }
 
     public void aplicarDesgastePorTiempo(int segundos) {
-
         int ciclos = segundos / 5; // cada 5 segundos como tu loop
-
         hambre = Math.max(hambre - (ciclos * 5), 0);
         energia = Math.max(energia - (ciclos * 3), 0);
         felicidad = Math.max(felicidad - (ciclos * 2), 0);

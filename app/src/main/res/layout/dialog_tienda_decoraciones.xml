@@ -8,26 +8,18 @@
     android:background="#88000000">
 
     <TextView
+        android:id="@+id/txtTituloDecoraciones"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="🍔 Tienda de comida"
+        android:text="Decoraciones"
         android:textSize="26sp"
         android:textStyle="bold"
         android:textColor="#FFFFFF"
         android:gravity="center"
-        android:layout_marginBottom="6dp" />
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Compra alimentos para tu mascota"
-        android:textSize="14sp"
-        android:textColor="#D6D6D6"
-        android:gravity="center"
         android:layout_marginBottom="18dp" />
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerFoods"
+        android:id="@+id/recyclerDecoraciones"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:clipToPadding="false"
