@@ -58,13 +58,13 @@ public class MainActivity extends AppCompatActivity {
     MediaPlayer sonidoComer, sonidoLleno;
 
     ViewFlipper viewFlipper;
-    ImageButton btnFlecha1, btnFlecha2, btnNevera, btnTienda;
+    ImageButton btnFlecha1, btnFlecha2, btnNevera, btnMinigame, btnTienda;
 
     Handler handler = new Handler();
     Runnable runnable;
     boolean isRun = true;
 
-    Button btnAlimentar, btnDormir, btnJugar, btnMinigame, btnLogros;
+    Button btnAlimentar, btnDormir, btnJugar, btnLogros;
 
     private long finTiempoGracia = 0;
 

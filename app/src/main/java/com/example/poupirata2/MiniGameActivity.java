@@ -52,7 +52,7 @@ public class MiniGameActivity extends AppCompatActivity {
                 handler.removeCallbacks(runnable);
 
                 txtFinalScore.setText("Puntos: " + score);
-                int ganancia = score/5;
+                int ganancia = score/2;
                 txtGanadas.setText(String.valueOf(ganancia));
                 layoutGameOver.setVisibility(View.VISIBLE);
 
