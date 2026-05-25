@@ -10,6 +10,7 @@ import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.media.MediaPlayer;
@@ -54,6 +55,7 @@ public class MainActivity extends AppCompatActivity {
     RecyclerView recyclerFoods;
     ArrayList<Food> foods = new ArrayList<>();
     Food comidaSeleccionada = null;
+    BaseDatos baseDatos;
 
     MediaPlayer sonidoComer, sonidoLleno;
 
@@ -69,8 +71,6 @@ public class MainActivity extends AppCompatActivity {
     private long finTiempoGracia = 0;
 
     Mascota mascota;
-    SharedPreferences prefs;
-    SharedPreferences.Editor editor;
 
     View fillHambre, fillEnergia, fillFelicidad, capaNoche;
     Handler handlerDormir = new Handler();
@@ -103,35 +103,9 @@ public class MainActivity extends AppCompatActivity {
         crearcomidas();
 
         mascota = new Mascota();
-
-        prefs = getSharedPreferences("tamagotchi", MODE_PRIVATE);
-        editor = prefs.edit();
-
-        GameData.monedas = prefs.getInt("monedas", 0);
-
-        int hambre = prefs.getInt("hambre", 50);
-        int energia = prefs.getInt("energia", 50);
-        int felicidad = prefs.getInt("felicidad", 50);
-
-        if (GameData.inventario.isEmpty()) {
-
-            int cantidadManzana = prefs.getInt("cantidad_manzana", 1);
-            int cantidadPizza = prefs.getInt("cantidad_pizza", 1);
-            int cantidadHamburguesa = prefs.getInt("cantidad_hamburguesa", 1);
-            int cantidadSushi = prefs.getInt("cantidad_sushi", 1);
-
-            GameData.inventario.add(new Food("Manzana", 5, R.drawable.ic_manzana, cantidadManzana, 100));
-            GameData.inventario.add(new Food("Hamburguesa", 15, R.drawable.ic_comida, cantidadHamburguesa, 250));
-            GameData.inventario.add(new Food("Pizza", 50, R.drawable.ic_pizza, cantidadPizza, 500));
-            GameData.inventario.add(new Food("Sushi", 100, R.drawable.ic_sushi, cantidadSushi, 1000));
-        }
-
-        finTiempoGracia = prefs.getLong("finTiempoGracia", 0);
-
-        mascota.setHambre(hambre);
-        mascota.setEnergia(energia);
-        mascota.setFelicidad(felicidad);
-
+        baseDatos = new BaseDatos(this);
+        cargarDatosSQLite();
+        cargarInventarioSQLite();
         aplicarTiempoFuera();
 
         sonidoComer = MediaPlayer.create(this, R.raw.comida_comer);
@@ -321,52 +295,49 @@ public class MainActivity extends AppCompatActivity {
                         break;
 
                     case MotionEvent.ACTION_UP:
-
                         if (colisionaConMascota(view, imgMascota)) {
-
                             if (comidaSeleccionada != null) {
-
                                 if (mascota.getHambre() > 970) {
                                     sonidoLleno.start();
                                 } else {
-
                                     mascota.alimentar(comidaSeleccionada.getHambre());
-
                                     LogrosManager.desbloquear(
                                             MainActivity.this,
                                             LogrosManager.PRIMER_ALIMENTO
                                     );
-
-                                    SharedPreferences statsPrefs =
-                                            getSharedPreferences("estadisticas", MODE_PRIVATE);
-
-                                    int vecesComidas = statsPrefs.getInt("veces_comidas", 0);
-                                    vecesComidas++;
-
-                                    statsPrefs.edit()
-                                            .putInt("veces_comidas", vecesComidas)
-                                            .apply();
-
+                                    LogrosManager.actualizarProgreso(
+                                            MainActivity.this,
+                                            LogrosManager.PRIMER_ALIMENTO,
+                                            1
+                                    );
+                                    int vecesComidas = obtenerProgresoComelon() + 1;
+                                    LogrosManager.actualizarProgreso(
+                                            MainActivity.this,
+                                            LogrosManager.COMELON,
+                                            vecesComidas
+                                    );
                                     if (vecesComidas >= 50) {
                                         LogrosManager.desbloquear(
                                                 MainActivity.this,
                                                 LogrosManager.COMELON
                                         );
                                     }
-
                                     sonidoComer.start();
-
-                                    comidaSeleccionada.setCantidad(comidaSeleccionada.getCantidad() - 1);
-
+                                    comidaSeleccionada.setCantidad(
+                                            comidaSeleccionada.getCantidad() - 1
+                                    );
                                     if (comidaSeleccionada.getCantidad() <= 0) {
                                         comidaSeleccionada = null;
                                         imgComida.setImageResource(0);
                                     }
-
                                     activartiempodegracia();
+                                    guardarDatos();
                                     actualizarUI();
-
-                                    Toast.makeText(MainActivity.this, "Ñam ñam", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(
+                                            MainActivity.this,
+                                            "Ñam ñam",
+                                            Toast.LENGTH_SHORT
+                                    ).show();
                                 }
                             }
                         }
@@ -446,159 +417,111 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void guardarDatos() {
+        long ultimoTiempo = System.currentTimeMillis();
+        // Mascota + monedas + dormir en SQLite
+        baseDatos.guardarMascota(
+                mascota.getHambre(),
+                mascota.getEnergia(),
+                mascota.getFelicidad(),
+                GameData.monedas,
+                ultimoTiempo,
+                durmiendo,
+                finTiempoGracia
+        );
+        // Inventario en SQLite
+        baseDatos.guardarInventarioComida(GameData.inventario);
 
-        if (!durmiendo) {
-            prefs.edit()
-                    .putLong("ultimoTiempo", System.currentTimeMillis())
-                    .apply();
-        }
-
-        for (Food food : GameData.inventario) {
-            switch (food.getNombre()) {
-                case "Manzana":
-                    editor.putInt("cantidad_manzana", food.getCantidad());
-                    break;
-
-                case "Pizza":
-                    editor.putInt("cantidad_pizza", food.getCantidad());
-                    break;
-
-                case "Hamburguesa":
-                    editor.putInt("cantidad_hamburguesa", food.getCantidad());
-                    break;
-
-                case "Sushi":
-                    editor.putInt("cantidad_sushi", food.getCantidad());
-                    break;
-            }
-        }
-
-        editor.putInt("monedas", GameData.monedas);
-        editor.putInt("hambre", mascota.getHambre());
-        editor.putInt("energia", mascota.getEnergia());
-        editor.putInt("felicidad", mascota.getFelicidad());
-        editor.putLong("finTiempoGracia", finTiempoGracia);
-
-        editor.apply();
     }
 
     private void aplicarTiempoFuera() {
 
-        long ultimoTiempo = prefs.getLong("ultimoTiempo", -1);
+        Cursor cursor = baseDatos.obtenerMascota();
 
-        if (ultimoTiempo == -1) {
-            prefs.edit()
-                    .putLong("ultimoTiempo", System.currentTimeMillis())
-                    .apply();
+        if (!cursor.moveToFirst()) {
+            cursor.close();
+            guardarDatos();
             return;
         }
-
+        long ultimoTiempo = cursor.getLong(
+                cursor.getColumnIndexOrThrow("ultimoTiempo")
+        );
+        boolean estabaDurmiendo =
+                cursor.getInt(cursor.getColumnIndexOrThrow("durmiendo")) == 1;
+        cursor.close();
+        if (ultimoTiempo <= 0) {
+            guardarDatos();
+            return;
+        }
         long tiempoActual = System.currentTimeMillis();
         long diferencia = tiempoActual - ultimoTiempo;
-
         if (diferencia <= 0) {
             return;
         }
 
-        boolean estabaDurmiendo = prefs.getBoolean("durmiendo", false);
-
         if (estabaDurmiendo) {
-
-            int intervalosDormidos = (int) (diferencia / INTERVALO_DORMIR_MS);
-
+            int intervalosDormidos =
+                    (int) (diferencia / INTERVALO_DORMIR_MS);
             if (intervalosDormidos > 0) {
-
-                int energiaGanada = intervalosDormidos * ENERGIA_POR_INTERVALO;
-                int nuevaEnergia = mascota.getEnergia() + energiaGanada;
-
+                int energiaGanada =
+                        intervalosDormidos * ENERGIA_POR_INTERVALO;
+                int nuevaEnergia =
+                        mascota.getEnergia() + energiaGanada;
                 if (nuevaEnergia >= ENERGIA_MAXIMA) {
                     nuevaEnergia = ENERGIA_MAXIMA;
-
                     mascota.setEnergia(nuevaEnergia);
-
                     durmiendo = false;
-
-                    prefs.edit()
-                            .putBoolean("durmiendo", false)
-                            .putLong("ultimoTiempo", tiempoActual)
-                            .apply();
-
                     cancelarNotificacionEnergiaMaxima();
-
                     guardarDatos();
                     return;
                 }
-
                 mascota.setEnergia(nuevaEnergia);
             }
-
         } else {
-
             int segundosFuera = (int) (diferencia / 1000);
-
             if (segundosFuera > 0) {
                 mascota.aplicarDesgastePorTiempo(segundosFuera);
             }
         }
-
-        prefs.edit()
-                .putLong("ultimoTiempo", tiempoActual)
-                .apply();
-
         guardarDatos();
     }
 
     private void empezarDormir() {
-
         if (mascota.getEnergia() >= ENERGIA_MAXIMA) {
-            Toast.makeText(this, "Tu mascota ya tiene la energía al máximo", Toast.LENGTH_SHORT).show();
+            Toast.makeText(
+                    this,
+                    "Tu mascota ya tiene la energía al máximo",
+                    Toast.LENGTH_SHORT
+            ).show();
             return;
         }
-
         durmiendo = true;
-
-        prefs.edit()
-                .putBoolean("durmiendo", true)
-                .putLong("ultimoTiempo", System.currentTimeMillis())
-                .apply();
-
+        guardarDatos();
         programarNotificacionEnergiaMaxima();
-
         capaNoche.setVisibility(View.VISIBLE);
         imgGorrito.setVisibility(View.VISIBLE);
-
         btnDormir.setText("☀️ Despertar");
-
         handlerDormir.removeCallbacks(subirEnergiaRunnable);
-        handlerDormir.postDelayed(subirEnergiaRunnable, INTERVALO_DORMIR_MS);
+        handlerDormir.postDelayed(
+                subirEnergiaRunnable,
+                INTERVALO_DORMIR_MS
+        );
     }
 
     private void despertar() {
-
         durmiendo = false;
-
         cancelarNotificacionEnergiaMaxima();
-
-        prefs.edit()
-                .putBoolean("durmiendo", false)
-                .putLong("ultimoTiempo", System.currentTimeMillis())
-                .apply();
-
+        guardarDatos();
         capaNoche.setVisibility(View.GONE);
         imgGorrito.setVisibility(View.GONE);
-
         btnDormir.setText("🌙 Dormir");
-
         handlerDormir.removeCallbacks(subirEnergiaRunnable);
-
-        guardarDatos();
         actualizarUI();
     }
 
     private final Runnable subirEnergiaRunnable = new Runnable() {
+
         @Override
         public void run() {
-
             if (!durmiendo) {
                 return;
             }
@@ -608,65 +531,56 @@ public class MainActivity extends AppCompatActivity {
                 despertar();
                 return;
             }
-
-            int nuevaEnergia = mascota.getEnergia() + ENERGIA_POR_INTERVALO;
-
+            int nuevaEnergia =
+                    mascota.getEnergia() + ENERGIA_POR_INTERVALO;
             if (nuevaEnergia >= ENERGIA_MAXIMA) {
                 nuevaEnergia = ENERGIA_MAXIMA;
-
                 mascota.setEnergia(nuevaEnergia);
-
                 cancelarNotificacionEnergiaMaxima();
-
                 despertar();
                 return;
             }
-
             mascota.setEnergia(nuevaEnergia);
-
-            prefs.edit()
-                    .putLong("ultimoTiempo", System.currentTimeMillis())
-                    .apply();
-
             activartiempodegracia();
-
+            guardarDatos();
             actualizarUI();
-
-            handlerDormir.postDelayed(this, INTERVALO_DORMIR_MS);
+            handlerDormir.postDelayed(
+                    this,
+                    INTERVALO_DORMIR_MS
+            );
         }
     };
 
     private void revisarSiSigueDurmiendo() {
-
-        boolean estabaDurmiendo = prefs.getBoolean("durmiendo", false);
-
-        if (estabaDurmiendo && mascota.getEnergia() < ENERGIA_MAXIMA) {
-
+        Cursor cursor = baseDatos.obtenerMascota();
+        if (!cursor.moveToFirst()) {
+            cursor.close();
+            return;
+        }
+        boolean estabaDurmiendo =
+                cursor.getInt(
+                        cursor.getColumnIndexOrThrow("durmiendo")
+                ) == 1;
+        cursor.close();
+        if (estabaDurmiendo &&
+                mascota.getEnergia() < ENERGIA_MAXIMA) {
             durmiendo = true;
-
             capaNoche.setVisibility(View.VISIBLE);
             imgGorrito.setVisibility(View.VISIBLE);
-
             btnDormir.setText("☀️ Despertar");
-
             handlerDormir.removeCallbacks(subirEnergiaRunnable);
-            handlerDormir.postDelayed(subirEnergiaRunnable, INTERVALO_DORMIR_MS);
-
+            handlerDormir.postDelayed(
+                    subirEnergiaRunnable,
+                    INTERVALO_DORMIR_MS
+            );
         } else {
-
             durmiendo = false;
-
             capaNoche.setVisibility(View.GONE);
             imgGorrito.setVisibility(View.GONE);
-
             btnDormir.setText("🌙 Dormir");
-
             handlerDormir.removeCallbacks(subirEnergiaRunnable);
-
             if (mascota.getEnergia() >= ENERGIA_MAXIMA) {
-                prefs.edit()
-                        .putBoolean("durmiendo", false)
-                        .apply();
+                guardarDatos();
             }
         }
     }
@@ -968,10 +882,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void guardarDecoracionComprada(Decoracion decoracion) {
-        prefs.edit()
-                .putBoolean("decoracion_" + decoracion.getId(), true)
-                .putInt("monedas", GameData.monedas)
-                .apply();
+        baseDatos.guardarDecoracionComprada(decoracion);
     }
 
     private void mostrarDecoracionEnHabitacion(Decoracion decoracion) {
@@ -1004,17 +915,76 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void cargarDecoracionesCompradas() {
-        cargarDecoracionesDeLista(obtenerDecoracionesPorHabitacion("cocina"));
-        cargarDecoracionesDeLista(obtenerDecoracionesPorHabitacion("sala"));
-        cargarDecoracionesDeLista(obtenerDecoracionesPorHabitacion("dormitorio"));
+
+        Cursor cursor = baseDatos.obtenerDecoracionesCompradas();
+        while (cursor.moveToNext()) {
+            Decoracion decoracion = new Decoracion(
+                    cursor.getString(cursor.getColumnIndexOrThrow("id")),
+                    cursor.getString(cursor.getColumnIndexOrThrow("nombre")),
+                    0,
+                    cursor.getInt(cursor.getColumnIndexOrThrow("imagen")),
+                    cursor.getString(cursor.getColumnIndexOrThrow("habitacion")),
+                    cursor.getInt(cursor.getColumnIndexOrThrow("x")),
+                    cursor.getInt(cursor.getColumnIndexOrThrow("y")),
+                    cursor.getInt(cursor.getColumnIndexOrThrow("ancho")),
+                    cursor.getInt(cursor.getColumnIndexOrThrow("alto"))
+            );
+            mostrarDecoracionEnHabitacion(decoracion);
+        }
+        cursor.close();
     }
-    private void cargarDecoracionesDeLista(ArrayList<Decoracion> lista) {
-        for (Decoracion decoracion : lista) {
-            boolean comprada = prefs.getBoolean("decoracion_" + decoracion.getId(), false);
-            if (comprada) {
-                mostrarDecoracionEnHabitacion(decoracion);
+
+    private void cargarDatosSQLite() {
+        Cursor cursor = baseDatos.obtenerMascota();
+
+        if (cursor.moveToFirst()) {
+            int hambre = cursor.getInt(cursor.getColumnIndexOrThrow("hambre"));
+            int energia = cursor.getInt(cursor.getColumnIndexOrThrow("energia"));
+            int felicidad = cursor.getInt(cursor.getColumnIndexOrThrow("felicidad"));
+            int monedas = cursor.getInt(cursor.getColumnIndexOrThrow("monedas"));
+            finTiempoGracia = cursor.getLong(
+                    cursor.getColumnIndexOrThrow("finTiempoGracia")
+            );
+            mascota.setHambre(hambre);
+            mascota.setEnergia(energia);
+            mascota.setFelicidad(felicidad);
+            GameData.monedas = monedas;
+        }
+
+        cursor.close();
+    }
+
+    private void cargarInventarioSQLite() {
+        GameData.inventario.clear();
+        Cursor cursor = baseDatos.obtenerInventarioComida();
+        while (cursor.moveToNext()) {
+            String nombre = cursor.getString(cursor.getColumnIndexOrThrow("nombre"));
+            int cantidad = cursor.getInt(cursor.getColumnIndexOrThrow("cantidad"));
+            if (nombre.equals("Manzana")) {
+                GameData.inventario.add(new Food("Manzana", 5, R.drawable.ic_manzana, cantidad, 100));
+            } else if (nombre.equals("Hamburguesa")) {
+                GameData.inventario.add(new Food("Hamburguesa", 15, R.drawable.ic_comida, cantidad, 250));
+            } else if (nombre.equals("Pizza")) {
+                GameData.inventario.add(new Food("Pizza", 50, R.drawable.ic_pizza, cantidad, 500));
+            } else if (nombre.equals("Sushi")) {
+                GameData.inventario.add(new Food("Sushi", 100, R.drawable.ic_sushi, cantidad, 1000));
             }
         }
+        cursor.close();
+    }
+
+    private int obtenerProgresoComelon() {
+        Cursor cursor = baseDatos.obtenerLogros();
+        int progreso = 0;
+        while (cursor.moveToNext()) {
+            String id = cursor.getString(cursor.getColumnIndexOrThrow("id"));
+            if (id.equals(LogrosManager.COMELON)) {
+                progreso = cursor.getInt(cursor.getColumnIndexOrThrow("progreso"));
+                break;
+            }
+        }
+        cursor.close();
+        return progreso;
     }
 
 }
