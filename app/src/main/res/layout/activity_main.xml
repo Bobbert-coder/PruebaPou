@@ -300,11 +300,25 @@
                 android:layout_weight="1"
                 android:gravity="center">
 
-                <Button
+                <LinearLayout
                     android:id="@+id/btnLogros"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="🏆 Logros" />
+                    android:layout_width="56dp"
+                    android:layout_height="56dp"
+                    android:layout_margin="8dp"
+                    android:background="@drawable/bg_btn_menu"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:elevation="4dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="🏆"
+                        android:textSize="24sp" />
+
+                </LinearLayout>
 
             </LinearLayout>
 

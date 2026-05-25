@@ -48,6 +48,8 @@ public class MainActivity extends AppCompatActivity {
 
     int comidaActual = 0, habitacionActual = 0;
 
+    LinearLayout btnLogros;
+
     FrameLayout contenedorDecoracionesCocina,contenedorDecoracionesDormitorio, contenedorDecoracionesSala;
     ImageView imgComida, imgMascota, imgGorrito;
     private LinearLayout mainLayout;
@@ -66,7 +68,7 @@ public class MainActivity extends AppCompatActivity {
     Runnable runnable;
     boolean isRun = true;
 
-    Button btnAlimentar, btnDormir, btnJugar, btnLogros;
+    Button btnAlimentar, btnDormir, btnJugar;
 
     private long finTiempoGracia = 0;
 
@@ -180,8 +182,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         btnLogros.setOnClickListener(v -> {
-            Intent intentlogros = new Intent(MainActivity.this, LogrosActivity.class);
-            startActivity(intentlogros);
+            abrirMenuProgreso();
         });
 
         btnFlecha1.setOnClickListener(v -> {
@@ -985,6 +986,32 @@ public class MainActivity extends AppCompatActivity {
         }
         cursor.close();
         return progreso;
+    }
+
+    private void abrirMenuProgreso() {
+
+        Dialog dialogProgreso = new Dialog(MainActivity.this);
+        dialogProgreso.setContentView(R.layout.dialog_menu);
+
+        LinearLayout btnVerLogros = dialogProgreso.findViewById(R.id.btnVerLogros);
+        LinearLayout btnVerEstadisticas = dialogProgreso.findViewById(R.id.btnVerEstadisticas);
+
+        btnVerLogros.setOnClickListener(v -> {
+            dialogProgreso.dismiss();
+
+            Intent intent = new Intent(MainActivity.this, LogrosActivity.class);
+            startActivity(intent);
+        });
+
+        btnVerEstadisticas.setOnClickListener(v -> {
+            dialogProgreso.dismiss();
+
+            Intent intent = new Intent(MainActivity.this, EstadisticasActivity.class);
+            startActivity(intent);
+        });
+
+        dialogProgreso.show();
+        configurarDialog(dialogProgreso, 1f, 1f);
     }
 
 }
