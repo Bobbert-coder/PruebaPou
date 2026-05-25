@@ -45,8 +45,8 @@ public class DecoracionAdapter extends RecyclerView.Adapter<DecoracionAdapter.Vi
         holder.txtNombre.setText(decoracion.getNombre());
         holder.txtPrecio.setText("💰 " + decoracion.getPrecio() + " monedas");
 
-        SharedPreferences prefs = context.getSharedPreferences("tamagotchi", Context.MODE_PRIVATE);
-        boolean yaComprada = prefs.getBoolean("decoracion_" + decoracion.getId(), false);
+        BaseDatos baseDatos = new BaseDatos(context);
+        boolean yaComprada = baseDatos.decoracionComprada(decoracion.getId());
 
         if (yaComprada) {
             holder.btnComprar.setText("Comprado");
@@ -57,29 +57,36 @@ public class DecoracionAdapter extends RecyclerView.Adapter<DecoracionAdapter.Vi
             holder.btnComprar.setEnabled(true);
             holder.btnComprar.setAlpha(1f);
         }
-
         holder.btnComprar.setOnClickListener(v -> {
-            boolean compradoAhora = prefs.getBoolean("decoracion_" + decoracion.getId(), false);
-
+            boolean compradoAhora =
+                    baseDatos.decoracionComprada(decoracion.getId());
             if (compradoAhora) {
-                Toast.makeText(context, "Ya compraste este objeto", Toast.LENGTH_SHORT).show();
+                Toast.makeText(
+                        context,
+                        "Ya compraste este objeto",
+                        Toast.LENGTH_SHORT
+                ).show();
                 return;
             }
+
             if (GameData.monedas >= decoracion.getPrecio()) {
                 GameData.monedas -= decoracion.getPrecio();
-                prefs.edit()
-                        .putBoolean("decoracion_" + decoracion.getId(), true)
-                        .putInt("monedas", GameData.monedas)
-                        .apply();
+                baseDatos.guardarDecoracionComprada(decoracion);
                 holder.btnComprar.setText("Comprado");
                 holder.btnComprar.setEnabled(false);
                 holder.btnComprar.setAlpha(0.5f);
-
                 listener.onComprada(decoracion);
-
-                Toast.makeText(context, "Compraste " + decoracion.getNombre(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(
+                        context,
+                        "Compraste " + decoracion.getNombre(),
+                        Toast.LENGTH_SHORT
+                ).show();
             } else {
-                Toast.makeText(context, "No tienes suficientes monedas", Toast.LENGTH_SHORT).show();
+                Toast.makeText(
+                        context,
+                        "No tienes suficientes monedas",
+                        Toast.LENGTH_SHORT
+                ).show();
             }
         });
     }
