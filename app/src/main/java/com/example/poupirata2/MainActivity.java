@@ -195,24 +195,18 @@ public class MainActivity extends AppCompatActivity {
             abrirMenuProgreso();
         });
 
-        btnMinigame.setOnClickListener( v ->{
-            Intent intent = new Intent(
-                    MainActivity.this,
-                    MiniGameActivity.class
-            );
-            miniGameLauncher.launch(intent);
+        btnMinigame.setOnClickListener(v -> {
+            abrirMenuMinijuegos();
         });
 
         btnFlecha1.setOnClickListener(v -> {
             viewFlipper.setInAnimation(this, R.anim.slide_in_left);
             viewFlipper.setOutAnimation(this, R.anim.slide_out_right);
-
             if (habitacionActual > 0) {
                 habitacionActual--;
             } else {
                 habitacionActual = 2;
             }
-
             actualizarUI();
             viewFlipper.showPrevious();
         });
@@ -1041,6 +1035,41 @@ public class MainActivity extends AppCompatActivity {
             experienciaNecesaria = GameData.nivel * 100;
         }
         guardarDatos();
+    }
+
+    private void abrirMenuMinijuegos() {
+        Dialog dialogMinijuegos = new Dialog(MainActivity.this);
+        dialogMinijuegos.setContentView(R.layout.dialog_minijuegos);
+        LinearLayout btnMiniJuegoPirata =
+                dialogMinijuegos.findViewById(R.id.btnMiniJuegoPirata);
+        LinearLayout btnProximamente1 =
+                dialogMinijuegos.findViewById(R.id.btnMiniJuegoProximamente1);
+        LinearLayout btnProximamente2 =
+                dialogMinijuegos.findViewById(R.id.btnMiniJuegoProximamente2);
+        btnMiniJuegoPirata.setOnClickListener(v -> {
+            dialogMinijuegos.dismiss();
+            Intent intent = new Intent(
+                    MainActivity.this,
+                    MiniGameActivity.class
+            );
+            miniGameLauncher.launch(intent);
+        });
+        btnProximamente1.setOnClickListener(v -> {
+            Toast.makeText(
+                    this,
+                    "Este minijuego estará disponible próximamente",
+                    Toast.LENGTH_SHORT
+            ).show();
+        });
+        btnProximamente2.setOnClickListener(v -> {
+            Toast.makeText(
+                    this,
+                    "Este minijuego estará disponible próximamente",
+                    Toast.LENGTH_SHORT
+            ).show();
+        });
+        dialogMinijuegos.show();
+        configurarDialog(dialogMinijuegos, 1f, 1f);
     }
 
 }

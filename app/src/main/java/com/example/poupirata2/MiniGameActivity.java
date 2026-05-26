@@ -75,9 +75,8 @@ public class MiniGameActivity extends AppCompatActivity {
                     imgFood.getY() < imgPlayer.getY() + imgPlayer.getHeight() &&
                     imgFood.getY() + imgFood.getHeight() > imgPlayer.getY()) {
 
-                if (aumento < 160)
+                if (aumento < 130)
                     aumento += 10;
-
                 score++;
                 if(score%5 == 0)
                 {
