@@ -1,5 +1,6 @@
 package com.example.poupirata2;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.MotionEvent;
@@ -18,7 +19,7 @@ public class MiniGameActivity extends AppCompatActivity {
     ImageView imgFood, imgPlayer;
     TextView txtScore;
     int aumento = 20;
-
+    int scoreTotal = 0;
     Handler handler = new Handler();
 
     int foodX=0, foodY=0;
@@ -52,14 +53,19 @@ public class MiniGameActivity extends AppCompatActivity {
                 handler.removeCallbacks(runnable);
 
                 txtFinalScore.setText("Puntos: " + score);
+                scoreTotal += score;
                 int ganancia = score/2;
                 txtGanadas.setText(String.valueOf(ganancia));
                 layoutGameOver.setVisibility(View.VISIBLE);
 
                 GameData.felicidadExtra = score * 4;
                 LogrosManager.desbloquear(MiniGameActivity.this, LogrosManager.PRIMER_JUEGO);
+                LogrosManager.actualizarProgreso(MiniGameActivity.this, LogrosManager.PRIMER_JUEGO, 1);
                 LogrosManager.verificarPuntaje(MiniGameActivity.this, score);
 
+                Intent resultado = new Intent();
+                resultado.putExtra("score", scoreTotal);
+                setResult(RESULT_OK, resultado);
             }
 
             // Colisión
@@ -69,7 +75,7 @@ public class MiniGameActivity extends AppCompatActivity {
                     imgFood.getY() < imgPlayer.getY() + imgPlayer.getHeight() &&
                     imgFood.getY() + imgFood.getHeight() > imgPlayer.getY()) {
 
-                if (aumento < 100)
+                if (aumento < 160)
                     aumento += 10;
 
                 score++;
@@ -121,14 +127,10 @@ public class MiniGameActivity extends AppCompatActivity {
 
         // Movimiento jugador
         imgPlayer.setOnTouchListener((v, event) -> {
-
             if (event.getAction() == MotionEvent.ACTION_MOVE) {
-
                 playerX = (int) event.getRawX();
-
                 imgPlayer.setX(playerX - imgPlayer.getWidth() / 2);
             }
-
             return true;
         });
 

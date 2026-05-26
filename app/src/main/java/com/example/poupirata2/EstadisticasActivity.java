@@ -8,7 +8,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 public class EstadisticasActivity extends AppCompatActivity {
 
-    TextView txtVecesComidas, txtMonedas, txtEnergia, txtHambre, txtFelicidad;
+    TextView txtNivel, txtVecesComidas, txtMonedas, txtEnergia, txtHambre, txtFelicidad;
 
     BaseDatos baseDatos;
 
@@ -24,6 +24,7 @@ public class EstadisticasActivity extends AppCompatActivity {
         txtEnergia = findViewById(R.id.txtEnergiaStats);
         txtHambre = findViewById(R.id.txtHambreStats);
         txtFelicidad = findViewById(R.id.txtFelicidadStats);
+        txtNivel = findViewById(R.id.txtNivelStats);
 
         cargarEstadisticas();
     }
@@ -39,12 +40,21 @@ public class EstadisticasActivity extends AppCompatActivity {
             int energia = cursor.getInt(cursor.getColumnIndexOrThrow("energia"));
             int hambre = cursor.getInt(cursor.getColumnIndexOrThrow("hambre"));
             int felicidad = cursor.getInt(cursor.getColumnIndexOrThrow("felicidad"));
+            int nivel = cursor.getInt(cursor.getColumnIndexOrThrow("nivel"));
+            int experiencia = cursor.getInt(cursor.getColumnIndexOrThrow("experiencia"));
 
             txtVecesComidas.setText("🍔 Veces que ha comido: " + vecesComidas);
             txtMonedas.setText("💰 Monedas actuales: " + monedas);
             txtEnergia.setText("⚡ Energía: " + energia + "/1000");
             txtHambre.setText("🍗 Hambre: " + hambre + "/1000");
             txtFelicidad.setText("😊 Felicidad: " + felicidad + "/1000");
+
+
+            int xpNecesaria = nivel * 100;
+            txtNivel.setText(
+                    "⭐ Nivel: " + nivel +
+                            "\nXP: " + experiencia + "/" + xpNecesaria
+            );
         }
 
         cursor.close();

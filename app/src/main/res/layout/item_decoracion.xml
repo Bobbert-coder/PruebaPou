@@ -34,15 +34,28 @@
             android:textSize="19sp"
             android:textStyle="bold" />
 
-        <TextView
-            android:id="@+id/txtPrecioDecoracion"
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text=" Monedas"
-            android:textSize="14sp"
-            android:textColor="#FFE082"
-            android:textStyle="bold"
-            android:layout_marginTop="6dp" />
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="30dp"
+                android:src="@drawable/ic_moneda"
+                android:layout_gravity="center_vertical"/>
+
+            <TextView
+                android:id="@+id/txtPrecioDecoracion"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=""
+                android:textSize="14sp"
+                android:textColor="#FFE082"
+                android:textStyle="bold"
+                android:layout_marginTop="6dp" />
+
+        </LinearLayout>
 
     </LinearLayout>
 

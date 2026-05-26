@@ -10,7 +10,7 @@ import java.util.ArrayList;
 
 public class BaseDatos extends SQLiteOpenHelper {
     private static final String DB_NAME = "PouPirata.db";
-    private static final int DB_VERSION = 5;
+    private static final int DB_VERSION = 6;
     public BaseDatos(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
     }
@@ -25,10 +25,13 @@ public class BaseDatos extends SQLiteOpenHelper {
                         "monedas INTEGER, " +
                         "ultimoTiempo INTEGER, " +
                         "durmiendo INTEGER, " +
-                        "finTiempoGracia INTEGER)"
+                        "finTiempoGracia INTEGER, " +
+                        "nivel INTEGER, " +
+                        "experiencia INTEGER)"
         );
 
         ContentValues valores = new ContentValues();
+
         valores.put("id", 1);
         valores.put("hambre", 50);
         valores.put("energia", 50);
@@ -37,6 +40,9 @@ public class BaseDatos extends SQLiteOpenHelper {
         valores.put("ultimoTiempo", System.currentTimeMillis());
         valores.put("durmiendo", 0);
         valores.put("finTiempoGracia", 0);
+        valores.put("nivel", 1);
+        valores.put("experiencia", 0);
+
         db.insert("mascota", null, valores);
 
         db.execSQL(
@@ -126,6 +132,11 @@ public class BaseDatos extends SQLiteOpenHelper {
             db.execSQL("ALTER TABLE mascota ADD COLUMN finTiempoGracia INTEGER DEFAULT 0");
         }
 
+        if (oldVersion < 6) {
+            db.execSQL("ALTER TABLE mascota ADD COLUMN nivel INTEGER DEFAULT 1");
+            db.execSQL("ALTER TABLE mascota ADD COLUMN experiencia INTEGER DEFAULT 0");
+        }
+
     }
 
     public Cursor obtenerInventarioComida() {
@@ -171,7 +182,9 @@ public class BaseDatos extends SQLiteOpenHelper {
             int monedas,
             long ultimoTiempo,
             boolean durmiendo,
-            long finTiempoGracia
+            long finTiempoGracia,
+            int nivel,
+            int experiencia
     ) {
         SQLiteDatabase db = getWritableDatabase();
 
@@ -184,6 +197,8 @@ public class BaseDatos extends SQLiteOpenHelper {
         valores.put("ultimoTiempo", ultimoTiempo);
         valores.put("durmiendo", durmiendo ? 1 : 0);
         valores.put("finTiempoGracia", finTiempoGracia);
+        valores.put("nivel", nivel);
+        valores.put("experiencia", experiencia);
 
         db.insertWithOnConflict(
                 "mascota",
