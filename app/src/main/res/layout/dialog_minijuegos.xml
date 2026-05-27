@@ -60,7 +60,7 @@
             </LinearLayout>
 
             <LinearLayout
-                android:id="@+id/btnMiniJuegoProximamente1"
+                android:id="@+id/btnMiniJuegoFlappy"
                 android:layout_width="0dp"
                 android:layout_height="130dp"
                 android:layout_columnWeight="1"
@@ -68,7 +68,8 @@
                 android:orientation="vertical"
                 android:gravity="center"
                 android:padding="10dp"
-                android:alpha="0.45"
+                android:clickable="true"
+                android:focusable="true"
                 android:background="@drawable/bg_categoria_tienda">
 
                 <ImageView
@@ -80,13 +81,12 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Próximamente"
+                    android:text="Flappy Flappy"
                     android:textColor="#FFFFFF"
-                    android:textSize="13sp"
+                    android:textSize="14sp"
                     android:textStyle="bold"
                     android:gravity="center"
                     android:layout_marginTop="8dp" />
-
             </LinearLayout>
 
             <LinearLayout

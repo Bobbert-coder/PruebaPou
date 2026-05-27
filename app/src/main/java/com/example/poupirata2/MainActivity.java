@@ -145,11 +145,15 @@ public class MainActivity extends AppCompatActivity {
         miniGameLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
+
                     if (result.getResultCode() == RESULT_OK &&
                             result.getData() != null) {
-                        int score =
-                                result.getData().getIntExtra("score", 0);
-                        int xpGanada = score * 2;
+
+                        int score = result.getData().getIntExtra("score", 0);
+                        int xpGanada = result.getData().getIntExtra(
+                                "xpGanada",
+                                score * 2
+                        );
                         ganarExperiencia(xpGanada);
                         Toast.makeText(
                                 MainActivity.this,
@@ -1042,8 +1046,8 @@ public class MainActivity extends AppCompatActivity {
         dialogMinijuegos.setContentView(R.layout.dialog_minijuegos);
         LinearLayout btnMiniJuegoPirata =
                 dialogMinijuegos.findViewById(R.id.btnMiniJuegoPirata);
-        LinearLayout btnProximamente1 =
-                dialogMinijuegos.findViewById(R.id.btnMiniJuegoProximamente1);
+        LinearLayout btnMiniJuegoFlappy =
+                dialogMinijuegos.findViewById(R.id.btnMiniJuegoFlappy);
         LinearLayout btnProximamente2 =
                 dialogMinijuegos.findViewById(R.id.btnMiniJuegoProximamente2);
         btnMiniJuegoPirata.setOnClickListener(v -> {
@@ -1054,12 +1058,14 @@ public class MainActivity extends AppCompatActivity {
             );
             miniGameLauncher.launch(intent);
         });
-        btnProximamente1.setOnClickListener(v -> {
-            Toast.makeText(
-                    this,
-                    "Este minijuego estará disponible próximamente",
-                    Toast.LENGTH_SHORT
-            ).show();
+        btnMiniJuegoFlappy.setOnClickListener(v -> {
+            dialogMinijuegos.dismiss();
+
+            Intent intent = new Intent(
+                    MainActivity.this,
+                    FlappyGameActivity.class
+            );
+            miniGameLauncher.launch(intent);
         });
         btnProximamente2.setOnClickListener(v -> {
             Toast.makeText(
