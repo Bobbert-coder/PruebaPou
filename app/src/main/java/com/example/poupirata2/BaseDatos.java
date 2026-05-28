@@ -52,10 +52,10 @@ public class BaseDatos extends SQLiteOpenHelper {
                         "cantidad INTEGER)"
         );
 
-        insertarComidaInicial(db, "Manzana", 1);
-        insertarComidaInicial(db, "Hamburguesa", 1);
-        insertarComidaInicial(db, "Pizza", 1);
-        insertarComidaInicial(db, "Sushi", 1);
+        insertarComidaInicial(db, "Manzana", 5);
+       // insertarComidaInicial(db, "Hamburguesa", 1);
+       // insertarComidaInicial(db, "Pizza", 1);
+       // insertarComidaInicial(db, "Sushi", 1);
 
         db.execSQL(
                 "CREATE TABLE decoraciones_compradas (" +

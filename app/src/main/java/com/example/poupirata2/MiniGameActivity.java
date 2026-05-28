@@ -1,8 +1,10 @@
 package com.example.poupirata2;
 
 import android.content.Intent;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
+import android.provider.MediaStore;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
@@ -24,6 +26,7 @@ public class MiniGameActivity extends AppCompatActivity {
     int aumento = 20, multExp = 2;
     int scoreTotal = 0;
     Handler handler = new Handler();
+    MediaPlayer musica;
     LinearLayout layoutInicio;
     Button btnIniciarJuego;
     boolean juegoIniciado = false;
@@ -66,6 +69,7 @@ public class MiniGameActivity extends AppCompatActivity {
                 txtXpGanada.setText("+" + xpGanada + " XP");
 
                 layoutGameOver.setVisibility(View.VISIBLE);
+                musica.pause();
 
                 GameData.felicidadExtra = score * 4;
                 LogrosManager.desbloquear(MiniGameActivity.this, LogrosManager.PRIMER_JUEGO);
@@ -119,7 +123,9 @@ public class MiniGameActivity extends AppCompatActivity {
         setContentView(R.layout.activity_minigame);
 
 
-
+        musica = MediaPlayer.create(this, R.raw.splashing_around);
+        musica.setVolume(0.2f, 0.2f);
+        musica.setLooping(true);
         vidas = 3;
         layoutJuego = findViewById(R.id.activity_minigame);
         imgFood = findViewById(R.id.imgFood);
@@ -158,6 +164,7 @@ public class MiniGameActivity extends AppCompatActivity {
         Intent resultado = new Intent();
         resultado.putExtra("score", scoreTotal);
         resultado.putExtra("xpGanada", scoreTotal * multExp);
+        musica.stop();
         super.onDestroy();
         handler.removeCallbacks(runnable);
     }
@@ -171,6 +178,7 @@ public class MiniGameActivity extends AppCompatActivity {
         txtTitulo.setText(titulo);
         txtDescripcion.setText(descripcion);
         btnIniciar.setOnClickListener(v -> {
+            musica.start();
             dialog.dismiss();
             onStart.run();
         });
@@ -189,6 +197,7 @@ public class MiniGameActivity extends AppCompatActivity {
         score = 0;
         aumento = 20;
         foodY = 0;
+        musica.start();
         txtScore.setText("Puntos: 0");
         layoutGameOver.setVisibility(View.GONE);
         reiniciarposicion();

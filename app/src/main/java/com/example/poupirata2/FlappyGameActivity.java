@@ -3,6 +3,7 @@ package com.example.poupirata2;
 import android.app.Dialog;
 import android.content.Intent;
 import android.graphics.Rect;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.MotionEvent;
@@ -23,6 +24,7 @@ public class FlappyGameActivity extends AppCompatActivity {
     ImageView imgPlayer;
     View tuboArriba, tuboAbajo;
     TextView txtScore, txtFinalScore, txtMonedasGanadas;
+    MediaPlayer musica;
     LinearLayout layoutGameOver;
     Button btnReiniciar;
     Handler handler = new Handler();
@@ -71,6 +73,10 @@ public class FlappyGameActivity extends AppCompatActivity {
         txtMonedasGanadas = findViewById(R.id.txtMonedasGanadas);
         btnReiniciar = findViewById(R.id.btnReiniciar);
 
+        musica = MediaPlayer.create(this, R.raw.elektronomia);
+        musica.setVolume(0.1f, 0.1f);
+        musica.setLooping(true);
+
         layoutFlappy.setOnTouchListener((v, event) -> {
             if (event.getAction() == MotionEvent.ACTION_DOWN && !gameOver) {
                 velocidadY = salto;
@@ -97,6 +103,7 @@ public class FlappyGameActivity extends AppCompatActivity {
         velocidadY = 0;
         gameOver = false;
         puntoSumado = false;
+        musica.start();
 
         txtScore.setText("Puntos: 0");
         layoutGameOver.setVisibility(View.GONE);
@@ -213,6 +220,7 @@ public class FlappyGameActivity extends AppCompatActivity {
 
         int monedasGanadas = score * 5;
         int xpGanada = score * 3;
+        musica.pause();
 
         txtFinalScore.setText("Puntos: " + score);
         txtMonedasGanadas.setText(" " + monedasGanadas);
@@ -247,6 +255,7 @@ public class FlappyGameActivity extends AppCompatActivity {
         txtDescripcion.setText(descripcion);
 
         btnIniciar.setOnClickListener(v -> {
+            musica.start();
             dialog.dismiss();
             onStart.run();
         });
@@ -268,6 +277,7 @@ public class FlappyGameActivity extends AppCompatActivity {
         super.onDestroy();
 
         handler.removeCallbacks(runnable);
+        musica.stop();
 
         Intent resultado = new Intent();
         resultado.putExtra("score", scoreTotal);

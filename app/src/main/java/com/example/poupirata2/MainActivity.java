@@ -47,11 +47,11 @@ public class MainActivity extends AppCompatActivity {
     // Cuando ya funcione normal, cámbialo a 1000.
     private static final int INTERVALO_DORMIR_MS = 500;
 
-    int comidaActual = 0, habitacionActual = 0;
+    int habitacionActual = 0;
     private ActivityResultLauncher<Intent> miniGameLauncher;
     LinearLayout btnLogros;
     FrameLayout contenedorDecoracionesCocina,contenedorDecoracionesDormitorio, contenedorDecoracionesSala;
-    ImageView imgComida, imgMascota, imgGorrito;
+    ImageView imgComida, imgMascota, imgGorrito, imgProp, btnDormir;
     private LinearLayout mainLayout;
     RecyclerView recyclerFoods;
     ArrayList<Food> foods = new ArrayList<>();
@@ -63,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
     Handler handler = new Handler();
     Runnable runnable;
     boolean isRun = true;
-    Button btnAlimentar, btnDormir, btnJugar;
+    Button btnAlimentar, btnJugar;
     private long finTiempoGracia = 0;
     Mascota mascota;
     View fillHambre, fillEnergia, fillFelicidad, capaNoche;
@@ -118,6 +118,7 @@ public class MainActivity extends AppCompatActivity {
         imgComida = findViewById(R.id.imgComida);
         imgMascota = findViewById(R.id.imgMascota);
         imgGorrito = findViewById(R.id.imgGorrito);
+        imgProp = findViewById(R.id.imgGorrito2);
 
         fillHambre = findViewById(R.id.fillHambre);
         fillEnergia = findViewById(R.id.fillEnergia);
@@ -509,7 +510,8 @@ public class MainActivity extends AppCompatActivity {
         programarNotificacionEnergiaMaxima();
         capaNoche.setVisibility(View.VISIBLE);
         imgGorrito.setVisibility(View.VISIBLE);
-        btnDormir.setText("☀️ Despertar");
+        imgProp.setVisibility(View.INVISIBLE);
+        btnDormir.setImageResource(R.drawable.ic_lamp_apagada);
         handlerDormir.removeCallbacks(subirEnergiaRunnable);
         handlerDormir.postDelayed(
                 subirEnergiaRunnable,
@@ -523,7 +525,9 @@ public class MainActivity extends AppCompatActivity {
         guardarDatos();
         capaNoche.setVisibility(View.GONE);
         imgGorrito.setVisibility(View.GONE);
-        btnDormir.setText("🌙 Dormir");
+        imgProp.setVisibility(View.VISIBLE);
+
+        btnDormir.setImageResource(R.drawable.ic_lampara_encendida);
         handlerDormir.removeCallbacks(subirEnergiaRunnable);
         actualizarUI();
     }
@@ -577,7 +581,8 @@ public class MainActivity extends AppCompatActivity {
             durmiendo = true;
             capaNoche.setVisibility(View.VISIBLE);
             imgGorrito.setVisibility(View.VISIBLE);
-            btnDormir.setText("☀️ Despertar");
+            imgProp.setVisibility(View.INVISIBLE);
+            btnDormir.setImageResource(R.drawable.ic_lamp_apagada);
             handlerDormir.removeCallbacks(subirEnergiaRunnable);
             handlerDormir.postDelayed(
                     subirEnergiaRunnable,
@@ -587,7 +592,8 @@ public class MainActivity extends AppCompatActivity {
             durmiendo = false;
             capaNoche.setVisibility(View.GONE);
             imgGorrito.setVisibility(View.GONE);
-            btnDormir.setText("🌙 Dormir");
+            imgProp.setVisibility(View.VISIBLE);
+            btnDormir.setImageResource(R.drawable.ic_lampara_encendida);
             handlerDormir.removeCallbacks(subirEnergiaRunnable);
             if (mascota.getEnergia() >= ENERGIA_MAXIMA) {
                 guardarDatos();
