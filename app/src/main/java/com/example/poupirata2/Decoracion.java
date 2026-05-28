@@ -9,7 +9,7 @@ public class Decoracion {
     private String habitacion;
     private int x, y, ancho, alto;
 
-
+    private int nivelRequerido;
 
     public Decoracion(String id, String nombre, int precio, int imagen, String habitacion,
                       int x, int y, int ancho, int alto) {
@@ -22,6 +22,9 @@ public class Decoracion {
         this.y = y;
         this.ancho = ancho;
         this.alto = alto;
+    }
+    public int getNivelRequerido() {
+        return nivelRequerido;
     }
 
     public int getX() { return x; }

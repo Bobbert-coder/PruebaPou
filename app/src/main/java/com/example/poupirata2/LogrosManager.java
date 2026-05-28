@@ -59,7 +59,7 @@ public class LogrosManager {
         insertarLogroBase(baseDatos, new Logro(
                 PRIMER_JUEGO,
                 "Jugador principiante",
-                "Juega el minijuego por primera vez.",
+                "Juega un minijuego por primera vez.",
                 baseDatos.logroDesbloqueado(PRIMER_JUEGO),
                 baseDatos.logroDesbloqueado(PRIMER_JUEGO) ? 1 : 0,
                 1
@@ -104,7 +104,7 @@ public class LogrosManager {
         insertarLogroBase(baseDatos, new Logro(
                 BUEN_PUNTAJE,
                 "Buen puntaje",
-                "Consigue 20 puntos en el minijuego.",
+                "Consigue 50 puntos o más en el minijuego de atrapar comida.",
                 baseDatos.logroDesbloqueado(BUEN_PUNTAJE),
                 baseDatos.logroDesbloqueado(BUEN_PUNTAJE) ? 1 : 0,
                 1
@@ -167,7 +167,7 @@ public class LogrosManager {
         }
     }
     public static void verificarPuntaje(Context context, int score) {
-        if (score >= 20) {
+        if (score >= 50) {
             desbloquear(context, BUEN_PUNTAJE);
             actualizarProgreso(context, BUEN_PUNTAJE, 1);
         }

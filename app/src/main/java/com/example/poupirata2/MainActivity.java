@@ -8,7 +8,6 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Color;
@@ -29,6 +28,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -44,38 +45,30 @@ public class MainActivity extends AppCompatActivity {
 
     // Para pruebas usa 50.
     // Cuando ya funcione normal, cámbialo a 1000.
-    private static final int INTERVALO_DORMIR_MS = 50;
+    private static final int INTERVALO_DORMIR_MS = 500;
 
-    int comidaActual = 0, habitacionActual = 0;
-
+    int habitacionActual = 0;
+    private ActivityResultLauncher<Intent> miniGameLauncher;
+    LinearLayout btnLogros;
     FrameLayout contenedorDecoracionesCocina,contenedorDecoracionesDormitorio, contenedorDecoracionesSala;
-    ImageView imgComida, imgMascota, imgGorrito;
+    ImageView imgComida, imgMascota, imgGorrito, imgProp, btnDormir;
     private LinearLayout mainLayout;
-
     RecyclerView recyclerFoods;
     ArrayList<Food> foods = new ArrayList<>();
     Food comidaSeleccionada = null;
     BaseDatos baseDatos;
-
     MediaPlayer sonidoComer, sonidoLleno;
-
     ViewFlipper viewFlipper;
     ImageButton btnFlecha1, btnFlecha2, btnNevera, btnMinigame, btnTienda;
-
     Handler handler = new Handler();
     Runnable runnable;
     boolean isRun = true;
-
-    Button btnAlimentar, btnDormir, btnJugar, btnLogros;
-
+    Button btnAlimentar, btnJugar;
     private long finTiempoGracia = 0;
-
     Mascota mascota;
-
     View fillHambre, fillEnergia, fillFelicidad, capaNoche;
     Handler handlerDormir = new Handler();
     boolean durmiendo = false;
-
     FrameLayout boxHambre, boxEnergia, boxFelicidad;
     TextView txtMonedas, txtHabitacion;
 
@@ -125,6 +118,7 @@ public class MainActivity extends AppCompatActivity {
         imgComida = findViewById(R.id.imgComida);
         imgMascota = findViewById(R.id.imgMascota);
         imgGorrito = findViewById(R.id.imgGorrito);
+        imgProp = findViewById(R.id.imgGorrito2);
 
         fillHambre = findViewById(R.id.fillHambre);
         fillEnergia = findViewById(R.id.fillEnergia);
@@ -148,6 +142,29 @@ public class MainActivity extends AppCompatActivity {
         btnFlecha1 = findViewById(R.id.btnFlecha1);
         btnFlecha2 = findViewById(R.id.btnFlecha2);
         viewFlipper = findViewById(R.id.viewFlipper);
+
+        miniGameLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+
+                    if (result.getResultCode() == RESULT_OK &&
+                            result.getData() != null) {
+
+                        int score = result.getData().getIntExtra("score", 0);
+                        int xpGanada = result.getData().getIntExtra(
+                                "xpGanada",
+                                score * 2
+                        );
+                        ganarExperiencia(xpGanada);
+                        Toast.makeText(
+                                MainActivity.this,
+                                "Ganaste " + xpGanada + " XP",
+                                Toast.LENGTH_SHORT
+                        ).show();
+                    }
+                }
+        );
+
 
         final float[] comidaX = new float[1];
         final float[] comidaY = new float[1];
@@ -180,20 +197,21 @@ public class MainActivity extends AppCompatActivity {
         });
 
         btnLogros.setOnClickListener(v -> {
-            Intent intentlogros = new Intent(MainActivity.this, LogrosActivity.class);
-            startActivity(intentlogros);
+            abrirMenuProgreso();
+        });
+
+        btnMinigame.setOnClickListener(v -> {
+            abrirMenuMinijuegos();
         });
 
         btnFlecha1.setOnClickListener(v -> {
             viewFlipper.setInAnimation(this, R.anim.slide_in_left);
             viewFlipper.setOutAnimation(this, R.anim.slide_out_right);
-
             if (habitacionActual > 0) {
                 habitacionActual--;
             } else {
                 habitacionActual = 2;
             }
-
             actualizarUI();
             viewFlipper.showPrevious();
         });
@@ -268,11 +286,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        btnMinigame.setOnClickListener(v -> {
-            Intent intent = new Intent(MainActivity.this, MiniGameActivity.class);
-            startActivity(intent);
-        });
-
         imgComida.setOnTouchListener(new View.OnTouchListener() {
             float dX, dY;
 
@@ -330,14 +343,10 @@ public class MainActivity extends AppCompatActivity {
                                         comidaSeleccionada = null;
                                         imgComida.setImageResource(0);
                                     }
+                                    ganarExperiencia(10);
                                     activartiempodegracia();
                                     guardarDatos();
                                     actualizarUI();
-                                    Toast.makeText(
-                                            MainActivity.this,
-                                            "Ñam ñam",
-                                            Toast.LENGTH_SHORT
-                                    ).show();
                                 }
                             }
                         }
@@ -426,7 +435,9 @@ public class MainActivity extends AppCompatActivity {
                 GameData.monedas,
                 ultimoTiempo,
                 durmiendo,
-                finTiempoGracia
+                finTiempoGracia,
+                GameData.nivel,
+                GameData.experiencia
         );
         // Inventario en SQLite
         baseDatos.guardarInventarioComida(GameData.inventario);
@@ -499,7 +510,8 @@ public class MainActivity extends AppCompatActivity {
         programarNotificacionEnergiaMaxima();
         capaNoche.setVisibility(View.VISIBLE);
         imgGorrito.setVisibility(View.VISIBLE);
-        btnDormir.setText("☀️ Despertar");
+        imgProp.setVisibility(View.INVISIBLE);
+        btnDormir.setImageResource(R.drawable.ic_lamp_apagada);
         handlerDormir.removeCallbacks(subirEnergiaRunnable);
         handlerDormir.postDelayed(
                 subirEnergiaRunnable,
@@ -513,7 +525,9 @@ public class MainActivity extends AppCompatActivity {
         guardarDatos();
         capaNoche.setVisibility(View.GONE);
         imgGorrito.setVisibility(View.GONE);
-        btnDormir.setText("🌙 Dormir");
+        imgProp.setVisibility(View.VISIBLE);
+
+        btnDormir.setImageResource(R.drawable.ic_lampara_encendida);
         handlerDormir.removeCallbacks(subirEnergiaRunnable);
         actualizarUI();
     }
@@ -567,7 +581,8 @@ public class MainActivity extends AppCompatActivity {
             durmiendo = true;
             capaNoche.setVisibility(View.VISIBLE);
             imgGorrito.setVisibility(View.VISIBLE);
-            btnDormir.setText("☀️ Despertar");
+            imgProp.setVisibility(View.INVISIBLE);
+            btnDormir.setImageResource(R.drawable.ic_lamp_apagada);
             handlerDormir.removeCallbacks(subirEnergiaRunnable);
             handlerDormir.postDelayed(
                     subirEnergiaRunnable,
@@ -577,7 +592,8 @@ public class MainActivity extends AppCompatActivity {
             durmiendo = false;
             capaNoche.setVisibility(View.GONE);
             imgGorrito.setVisibility(View.GONE);
-            btnDormir.setText("🌙 Dormir");
+            imgProp.setVisibility(View.VISIBLE);
+            btnDormir.setImageResource(R.drawable.ic_lampara_encendida);
             handlerDormir.removeCallbacks(subirEnergiaRunnable);
             if (mascota.getEnergia() >= ENERGIA_MAXIMA) {
                 guardarDatos();
@@ -721,10 +737,10 @@ public class MainActivity extends AppCompatActivity {
 
     private void crearcomidas() {
 
-        foods.add(new Food("Manzana", 5, R.drawable.ic_manzana, 0, 100));
-        foods.add(new Food("Hamburguesa", 15, R.drawable.ic_comida, 0, 250));
-        foods.add(new Food("Pizza", 50, R.drawable.ic_pizza, 0, 500));
-        foods.add(new Food("Sushi", 100, R.drawable.ic_sushi, 0, 1000));
+        foods.add(new Food("Manzana", 5, R.drawable.ic_manzana, 0, 100, 1));
+        foods.add(new Food("Hamburguesa", 15, R.drawable.ic_comida, 0, 250, 2));
+        foods.add(new Food("Pizza", 50, R.drawable.ic_pizza, 0, 500, 3));
+        foods.add(new Food("Sushi", 100, R.drawable.ic_sushi, 0, 1000, 4));
     }
 
     private void abrirTiendaComida() {
@@ -949,6 +965,8 @@ public class MainActivity extends AppCompatActivity {
             mascota.setEnergia(energia);
             mascota.setFelicidad(felicidad);
             GameData.monedas = monedas;
+            GameData.nivel = cursor.getInt(cursor.getColumnIndexOrThrow("nivel"));
+            GameData.experiencia = cursor.getInt(cursor.getColumnIndexOrThrow("experiencia"));
         }
 
         cursor.close();
@@ -961,13 +979,13 @@ public class MainActivity extends AppCompatActivity {
             String nombre = cursor.getString(cursor.getColumnIndexOrThrow("nombre"));
             int cantidad = cursor.getInt(cursor.getColumnIndexOrThrow("cantidad"));
             if (nombre.equals("Manzana")) {
-                GameData.inventario.add(new Food("Manzana", 5, R.drawable.ic_manzana, cantidad, 100));
+                GameData.inventario.add(new Food("Manzana", 5, R.drawable.ic_manzana, cantidad, 100, 1));
             } else if (nombre.equals("Hamburguesa")) {
-                GameData.inventario.add(new Food("Hamburguesa", 15, R.drawable.ic_comida, cantidad, 250));
+                GameData.inventario.add(new Food("Hamburguesa", 15, R.drawable.ic_comida, cantidad, 250, 2));
             } else if (nombre.equals("Pizza")) {
-                GameData.inventario.add(new Food("Pizza", 50, R.drawable.ic_pizza, cantidad, 500));
+                GameData.inventario.add(new Food("Pizza", 50, R.drawable.ic_pizza, cantidad, 500, 3));
             } else if (nombre.equals("Sushi")) {
-                GameData.inventario.add(new Food("Sushi", 100, R.drawable.ic_sushi, cantidad, 1000));
+                GameData.inventario.add(new Food("Sushi", 100, R.drawable.ic_sushi, cantidad, 1000, 4));
             }
         }
         cursor.close();
@@ -985,6 +1003,85 @@ public class MainActivity extends AppCompatActivity {
         }
         cursor.close();
         return progreso;
+    }
+
+    private void abrirMenuProgreso() {
+
+        Dialog dialogProgreso = new Dialog(MainActivity.this);
+        dialogProgreso.setContentView(R.layout.dialog_menu);
+
+        LinearLayout btnVerLogros = dialogProgreso.findViewById(R.id.btnVerLogros);
+        LinearLayout btnVerEstadisticas = dialogProgreso.findViewById(R.id.btnVerEstadisticas);
+
+        btnVerLogros.setOnClickListener(v -> {
+            dialogProgreso.dismiss();
+
+            Intent intent = new Intent(MainActivity.this, LogrosActivity.class);
+            startActivity(intent);
+        });
+
+        btnVerEstadisticas.setOnClickListener(v -> {
+            dialogProgreso.dismiss();
+
+            Intent intent = new Intent(MainActivity.this, EstadisticasActivity.class);
+            startActivity(intent);
+        });
+
+        dialogProgreso.show();
+        configurarDialog(dialogProgreso, 1f, 1f);
+    }
+
+    private void ganarExperiencia(int cantidad) {
+        GameData.experiencia += cantidad;
+        int experienciaNecesaria = GameData.nivel * 100;
+        while (GameData.experiencia >= experienciaNecesaria) {
+            GameData.experiencia -= experienciaNecesaria;
+            GameData.nivel++;
+            Toast.makeText(
+                    this,
+                    "🎉 Tu mascota subió al nivel " + GameData.nivel,
+                    Toast.LENGTH_LONG
+            ).show();
+            experienciaNecesaria = GameData.nivel * 100;
+        }
+        guardarDatos();
+    }
+
+    private void abrirMenuMinijuegos() {
+        Dialog dialogMinijuegos = new Dialog(MainActivity.this);
+        dialogMinijuegos.setContentView(R.layout.dialog_minijuegos);
+        LinearLayout btnMiniJuegoPirata =
+                dialogMinijuegos.findViewById(R.id.btnMiniJuegoPirata);
+        LinearLayout btnMiniJuegoFlappy =
+                dialogMinijuegos.findViewById(R.id.btnMiniJuegoFlappy);
+        LinearLayout btnProximamente2 =
+                dialogMinijuegos.findViewById(R.id.btnMiniJuegoProximamente2);
+        btnMiniJuegoPirata.setOnClickListener(v -> {
+            dialogMinijuegos.dismiss();
+            Intent intent = new Intent(
+                    MainActivity.this,
+                    MiniGameActivity.class
+            );
+            miniGameLauncher.launch(intent);
+        });
+        btnMiniJuegoFlappy.setOnClickListener(v -> {
+            dialogMinijuegos.dismiss();
+
+            Intent intent = new Intent(
+                    MainActivity.this,
+                    FlappyGameActivity.class
+            );
+            miniGameLauncher.launch(intent);
+        });
+        btnProximamente2.setOnClickListener(v -> {
+            Toast.makeText(
+                    this,
+                    "Este minijuego estará disponible próximamente",
+                    Toast.LENGTH_SHORT
+            ).show();
+        });
+        dialogMinijuegos.show();
+        configurarDialog(dialogMinijuegos, 1f, 1f);
     }
 
 }

@@ -39,25 +39,40 @@ public class DecoracionAdapter extends RecyclerView.Adapter<DecoracionAdapter.Vi
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
+
         Decoracion decoracion = decoraciones.get(position);
 
         holder.imgDecoracion.setImageResource(decoracion.getImagen());
         holder.txtNombre.setText(decoracion.getNombre());
-        holder.txtPrecio.setText("💰 " + decoracion.getPrecio() + " monedas");
+
+        holder.txtPrecio.setText(
+                " " + decoracion.getPrecio() +
+                        " | Nivel " + decoracion.getNivelRequerido()
+        );
 
         BaseDatos baseDatos = new BaseDatos(context);
-        boolean yaComprada = baseDatos.decoracionComprada(decoracion.getId());
+
+        boolean yaComprada =
+                baseDatos.decoracionComprada(decoracion.getId());
 
         if (yaComprada) {
             holder.btnComprar.setText("Comprado");
             holder.btnComprar.setEnabled(false);
             holder.btnComprar.setAlpha(0.5f);
+
+        } else if (GameData.nivel < decoracion.getNivelRequerido()) {
+            holder.btnComprar.setText("Bloqueado");
+            holder.btnComprar.setEnabled(true);
+            holder.btnComprar.setAlpha(0.5f);
+
         } else {
             holder.btnComprar.setText("Comprar");
             holder.btnComprar.setEnabled(true);
             holder.btnComprar.setAlpha(1f);
         }
+
         holder.btnComprar.setOnClickListener(v -> {
+
             boolean compradoAhora =
                     baseDatos.decoracionComprada(decoracion.getId());
             if (compradoAhora) {
@@ -68,7 +83,14 @@ public class DecoracionAdapter extends RecyclerView.Adapter<DecoracionAdapter.Vi
                 ).show();
                 return;
             }
-
+            if (GameData.nivel < decoracion.getNivelRequerido()) {
+                Toast.makeText(
+                        context,
+                        "Necesitas nivel " + decoracion.getNivelRequerido(),
+                        Toast.LENGTH_SHORT
+                ).show();
+                return;
+            }
             if (GameData.monedas >= decoracion.getPrecio()) {
                 GameData.monedas -= decoracion.getPrecio();
                 baseDatos.guardarDecoracionComprada(decoracion);

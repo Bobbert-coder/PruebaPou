@@ -49,7 +49,6 @@ public class FoodAdapterNevera
         holder.btnUsar.setOnClickListener(v -> {
 
             if(food.getCantidad() > 0) {
-
                 //food.setCantidad(food.getCantidad() - 1);
                 notifyItemChanged(position);
                 listener.onFoodUsed(food);
